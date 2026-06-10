@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Respiratory Monitoring System | AI Medical Dashboard</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            color: #fff;
+            position: relative;
+        }
+
+        body::-webkit-scrollbar { width: 10px; }
+        body::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+        body::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px; }
+        body::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #764ba2, #667eea); }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 15px;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .title h1 {
+            font-size: 1.5rem; font-weight: 600;
+            background: linear-gradient(135deg, #fff, #a8c0ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .title p { font-size: 0.8rem; opacity: 0.8; }
+
+        .controls { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .btn {
+            padding: 10px 20px; border: none; border-radius: 8px;
+            font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: 1px solid rgba(255,255,255,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #eb3349, #f45c43); color: white; }
+
+        .status-badge { padding: 5px 12px; border-radius: 20px; background: rgba(0,0,0,0.3); font-size: 0.8rem; }
+
+        .split-container { flex: 1; display: flex; flex-direction: column; gap: 15px; min-height: 600px; }
+
+        .row { display: flex; flex: 1; gap: 15px; min-height: 400px; }
+
+        .pane {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            position: relative; min-height: 300px;
+        }
+
+        .pane-header {
+            padding: 12px 20px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-weight: 600; font-size: 1rem;
+        }
+
+        .pane-content { flex: 1; overflow: auto; padding: 15px; min-height: 200px; }
+
+        .gutter { background: rgba(255,255,255,0.2); transition: all 0.2s; }
+        .gutter:hover { background: rgba(255,255,255,0.5); }
+        .gutter.gutter-horizontal { cursor: col-resize; width: 4px; }
+        .gutter.gutter-vertical { cursor: row-resize; height: 4px; }
+
+        /* ── Cylinder / Respiratory Visualizer ── */
+        .cylinder-container {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            height: 100%; position: relative; min-height: 350px;
+        }
+        .cylinder {
+            position: relative; width: 200px; height: 300px;
+            background: linear-gradient(90deg, #2c3e50, #3498db, #2c3e50);
+            border-radius: 100px / 50px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            transition: all 0.05s linear;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cylinder::before {
+            content: ''; position: absolute; top: -20px; left: 0;
+            width: 100%; height: 40px;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.2) 100%);
+            border-radius: 50%;
+        }
+        .cylinder::after {
+            content: ''; position: absolute; bottom: -20px; left: 0;
+            width: 100%; height: 40px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.1) 100%);
+            border-radius: 50%;
+        }
+        .moving-ring {
+            position: absolute; width: 220px; height: 15px;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            border-radius: 10px; left: -10px;
+            transition: top 0.05s linear;
+            box-shadow: 0 0 20px rgba(245,87,108,0.8); z-index: 10;
+        }
+        .phase-text {
+            margin-top: 30px; font-size: 1.5rem; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        .phase-inhale { color: #38ef7d; text-shadow: 0 0 10px #38ef7d; }
+        .phase-exhale { color: #f5576c; text-shadow: 0 0 10px #f5576c; }
+        .phase-pause  { color: #fbbf24; text-shadow: 0 0 10px #fbbf24; }
+
+        /* ── Graph ── */
+        #breathingGraph {
+            width: 100%; height: 100%; min-height: 300px;
+            background: rgba(0,0,0,0.2); border-radius: 8px;
+        }
+        .graph-controls {
+            display: flex; gap: 10px; margin-bottom: 10px; padding: 5px;
+            background: rgba(0,0,0,0.3); border-radius: 8px;
+            flex-wrap: wrap; align-items: center;
+        }
+        .time-btn {
+            padding: 4px 12px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px; color: white; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;
+        }
+        .time-btn.active { background: #38ef7d; color: #000; border-color: #38ef7d; }
+        .time-btn:hover { background: rgba(255,255,255,0.2); }
+        .zoom-btn {
+            padding: 4px 12px;
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px; color: white; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;
+        }
+        .zoom-btn:hover { background: rgba(255,255,255,0.3); }
+        .stats { margin-left: auto; font-size: 0.8rem; display: flex; gap: 15px; align-items: center; }
+        .stat-item { background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 5px; }
+        .scroll-controls {
+            display: flex; gap: 5px; margin-left: 10px; padding-left: 10px;
+            border-left: 1px solid rgba(255,255,255,0.3);
+        }
+        .scroll-btn {
+            padding: 2px 8px; background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;
+            color: white; cursor: pointer; font-size: 0.7rem; transition: all 0.2s;
+        }
+        .scroll-btn:hover { background: rgba(255,255,255,0.3); }
+        .scroll-btn.active { background: #667eea; border-color: #667eea; }
+
+        /* ── Live Indicator ── */
+        .live-indicator {
+            display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+            background-color: #38ef7d; animation: pulse 1s infinite; margin-right: 5px;
+        }
+
+        /* ── Scroll-to-top ── */
+        .scroll-top-btn {
+            position: fixed; bottom: 30px; right: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease; z-index: 1000; font-size: 24px;
+            opacity: 0; visibility: hidden;
+        }
+        .scroll-top-btn.visible { opacity: 1; visibility: visible; }
+        .scroll-top-btn:hover { transform: translateY(-5px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+
+        @keyframes pulse { 0%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.2)} 100%{opacity:1;transform:scale(1)} }
+
+        /* ════════════════════════════════════════
+           RELAY CONTROL PANE  (bottom-left)
+        ════════════════════════════════════════ */
+        .relay-panel {
+            display: flex; flex-direction: column;
+            height: 100%; gap: 18px; padding: 6px 2px;
+        }
+
+        /* Breath-phase selector */
+        .relay-section-label {
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px;
+            text-transform: uppercase; opacity: 0.6; margin-bottom: 6px;
+        }
+
+        .relay-phase-group {
+            display: flex; gap: 12px;
+        }
+        .relay-phase-option {
+            flex: 1; position: relative;
+        }
+        .relay-phase-option input[type="radio"] { display: none; }
+        .relay-phase-option label {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 10px; border-radius: 10px; cursor: pointer; font-weight: 600;
+            font-size: 0.9rem; border: 2px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.07); transition: all 0.25s ease;
+            user-select: none;
+        }
+        .relay-phase-option input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background: rgba(102,126,234,0.25);
+            box-shadow: 0 0 14px rgba(102,126,234,0.4);
+        }
+        .relay-phase-option label:hover { background: rgba(255,255,255,0.13); }
+
+        /* Relay toggle button */
+        .relay-btn-wrap { display: flex; justify-content: center; }
+        .relay-toggle-btn {
+            width: 100%; max-width: 320px; padding: 16px 24px;
+            border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 700;
+            cursor: pointer; letter-spacing: 0.5px; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .relay-toggle-btn.off {
+            background: linear-gradient(135deg, #eb3349, #f45c43);
+            color: white;
+            box-shadow: 0 4px 18px rgba(235,51,73,0.45);
+        }
+        .relay-toggle-btn.on {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: #003326;
+            box-shadow: 0 4px 18px rgba(56,239,125,0.5);
+        }
+        .relay-toggle-btn:hover { transform: translateY(-2px); }
+        .relay-toggle-btn:active { transform: translateY(0px); }
+
+        /* Relay indicator dot */
+        .relay-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+            display: inline-block;
+        }
+        .relay-dot.on  { background: #003326; box-shadow: 0 0 8px #003326; }
+        .relay-dot.off { background: rgba(255,255,255,0.9); }
+
+        /* Mode selector */
+        .relay-mode-group {
+            display: flex; gap: 12px;
+        }
+        .relay-mode-btn {
+            flex: 1; padding: 12px; border-radius: 10px; cursor: pointer;
+            font-weight: 600; font-size: 0.9rem; border: 2px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.07); color: white; transition: all 0.25s ease;
+        }
+        .relay-mode-btn:hover { background: rgba(255,255,255,0.13); }
+        .relay-mode-btn.active {
+            border-color: #f5576c;
+            background: rgba(245,87,108,0.22);
+            box-shadow: 0 0 14px rgba(245,87,108,0.35);
+        }
+
+        /* Status bar inside relay panel */
+        .relay-status-bar {
+            padding: 10px 14px; border-radius: 8px;
+            background: rgba(0,0,0,0.35); font-size: 0.82rem;
+            border: 1px solid rgba(255,255,255,0.1); line-height: 1.5;
+            min-height: 48px; display: flex; align-items: center; gap: 8px;
+        }
+        .relay-status-icon { font-size: 1.1rem; }
+
+        /* ════════════════════════════════════════
+           HOLD-BREATH TIMER PANE  (bottom-right)
+        ════════════════════════════════════════ */
+        .timer-pane {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            height: 100%; gap: 20px; min-height: 300px;
+        }
+
+        .timer-label {
+            font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase;
+            opacity: 0.55; font-weight: 600;
+        }
+
+        .timer-display {
+            font-size: 5.5rem; font-weight: 800; letter-spacing: 2px;
+            font-variant-numeric: tabular-nums;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+        .timer-display.running {
+            color: #38ef7d;
+            text-shadow: 0 0 30px rgba(56,239,125,0.7), 0 0 60px rgba(56,239,125,0.3);
+        }
+        .timer-display.stopped {
+            color: #fbbf24;
+            text-shadow: 0 0 30px rgba(251,191,36,0.7), 0 0 60px rgba(251,191,36,0.3);
+        }
+        .timer-display.idle {
+            color: rgba(255,255,255,0.3);
+            text-shadow: none;
+        }
+
+        .timer-state-badge {
+            padding: 6px 18px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+        .timer-state-badge.idle   { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+        .timer-state-badge.running { background: rgba(56,239,125,0.25); color: #38ef7d; border: 1px solid rgba(56,239,125,0.4); }
+        .timer-state-badge.stopped { background: rgba(251,191,36,0.25); color: #fbbf24; border: 1px solid rgba(251,191,36,0.4); }
+
+        .timer-sub {
+            font-size: 0.8rem; opacity: 0.5; text-align: center;
+            max-width: 240px; line-height: 1.5;
+        }
+
+        /* Breathhold countdown bar */
+        .hold-progress-wrap {
+            width: 80%; max-width: 280px;
+        }
+        .hold-progress-label {
+            font-size: 0.7rem; opacity: 0.5; margin-bottom: 4px; display: flex; justify-content: space-between;
+        }
+        .hold-progress-track {
+            height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;
+        }
+        .hold-progress-fill {
+            height: 100%; background: linear-gradient(90deg, #667eea, #f5576c);
+            border-radius: 3px; transition: width 0.2s linear; width: 0%;
+        }
+
+        @media (max-width: 768px) {
+            .row { flex-direction: column; }
+            .stats { margin-left: 0; width: 100%; justify-content: space-between; margin-top: 8px; }
+            .graph-controls { flex-wrap: wrap; }
+            .scroll-controls { margin-left: 0; padding-left: 0; border-left: none; margin-top: 5px; }
+            .header { position: relative; top: 0; }
+            .timer-display { font-size: 3.5rem; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes relayPulse {
+            0%,100% { box-shadow: 0 4px 18px rgba(56,239,125,0.5); }
+            50%      { box-shadow: 0 4px 30px rgba(56,239,125,0.9); }
+        }
+        .relay-toggle-btn.on { animation: relayPulse 1.4s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+    <button class="scroll-top-btn" id="scrollTopBtn" title="Scroll to top">↑</button>
+
+    <div class="app-container">
+        <div class="header">
+            <div class="title">
+                <h1>Respiration Intelligence System</h1>
+                <p>AI-Powered Respiratory Monitoring | Real-time Chest Displacement Analysis (cm)</p>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" id="calibrateBtn">Calibrate Zero</button>
+                <button class="btn btn-success" id="startBtn">▶ Start Monitoring</button>
+                <button class="btn btn-danger" id="stopBtn">⏹ Stop</button>
+                <div class="status-badge" id="statusBadge">Disconnected</div>
+            </div>
+        </div>
+
+        <div class="split-container" id="splitContainer">
+            <!-- ══ TOP ROW ══ -->
+            <div class="row" id="topRow">
+                <!-- TOP-LEFT: Respiratory Motion Visualizer (moved here) -->
+                <div class="pane" id="pane1">
+                    <div class="pane-header">Respiratory Motion Visualizer</div>
+                    <div class="pane-content">
+                        <div class="cylinder-container">
+                            <div class="cylinder">
+                                <div class="moving-ring" id="movingRing"></div>
+                            </div>
+                            <div class="phase-text" id="phaseText">Waiting...</div>
+                            <div style="margin-top: 20px; font-size: 0.9rem; opacity: 0.7;">
+                                Inhale ↑ &nbsp;&nbsp;|&nbsp;&nbsp; Exhale ↓
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOP-RIGHT: Breathing Waveform Graph -->
+                <div class="pane" id="pane2">
+                    <div class="pane-header">
+                        <span class="live-indicator"></span>
+                        Real-time Breathing Waveform (cm)
+                    </div>
+                    <div class="pane-content" style="display: flex; flex-direction: column;">
+                        <div class="graph-controls">
+                            <button class="time-btn" data-seconds="5">5 sec</button>
+                            <button class="time-btn active" data-seconds="10">10 sec</button>
+                            <button class="time-btn" data-seconds="15">15 sec</button>
+                            <button class="time-btn" data-seconds="20">20 sec</button>
+                            <button class="time-btn" data-seconds="30">30 sec</button>
+                            <button class="time-btn" data-seconds="60">60 sec</button>
+                            <div style="width:1px;height:25px;background:rgba(255,255,255,0.2);margin:0 5px;"></div>
+                            <button class="zoom-btn" id="zoomInBtn">(+)</button>
+                            <button class="zoom-btn" id="zoomOutBtn">(-)</button>
+                            <button class="zoom-btn" id="resetZoomBtn">⟳ Reset</button>
+                            <div class="scroll-controls">
+                                <span style="font-size:0.7rem;">Scroll:</span>
+                                <button class="scroll-btn" id="scrollAutoBtn" data-mode="auto">Auto</button>
+                                <button class="scroll-btn" id="scrollManualBtn" data-mode="manual">Manual</button>
+                            </div>
+                            <div class="stats">
+                                <span class="stat-item">Current: <span id="currentDisp">0</span> cm</span>
+                                <span class="stat-item">Zero: <span id="zeroValue">--</span> cm</span>
+                            </div>
+                        </div>
+                        <canvas id="breathingGraph" style="flex:1;min-height:300px;"></canvas>
+                        <div style="text-align:center;font-size:0.7rem;margin-top:5px;opacity:0.6;">
+                            💡 Tip: Mouse wheel to zoom | Drag to pan | Double-click to reset
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ BOTTOM ROW ══ -->
+            <div class="row" id="bottomRow">
+                <!-- BOTTOM-LEFT: Relay Control System -->
+                <div class="pane" id="pane3">
+                    <div class="pane-header">⚡ Relay Control System</div>
+                    <div class="pane-content">
+                        <div class="relay-panel">
+
+                            <!-- 1. Breath phase selector -->
+                            <div>
+                                <div class="relay-section-label">Trigger On Breath Phase</div>
+                                <div class="relay-phase-group">
+                                    <div class="relay-phase-option">
+                                        <input type="radio" name="breathPhase" id="phaseInhale" value="inhale" checked>
+                                        <label for="phaseInhale">
+                                            <span style="font-size:1.2rem;"></span> Inhale
+                                        </label>
+                                    </div>
+                                    <div class="relay-phase-option">
+                                        <input type="radio" name="breathPhase" id="phaseExhale" value="exhale">
+                                        <label for="phaseExhale">
+                                            <span style="font-size:1.2rem;"></span> Exhale
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Relay toggle button -->
+                            <div class="relay-btn-wrap">
+                                <button class="relay-toggle-btn off" id="relayToggleBtn">
+                                    <span class="relay-dot off" id="relayDot"></span>
+                                    <span id="relayBtnLabel">RELAY OFF</span>
+                                </button>
+                            </div>
+
+                            <!-- 3. Auto / Manual mode -->
+                            <div>
+                                <div class="relay-section-label">Operation Mode</div>
+                                <div class="relay-mode-group">
+                                    <button class="relay-mode-btn active" id="relayAutoBtn">Auto</button>
+                                    <button class="relay-mode-btn" id="relayManualBtn">Manual</button>
+                                </div>
+                            </div>
+
+                            <!-- 4. Status info -->
+                            <div class="relay-status-bar" id="relayStatusBar">
+                                <span class="relay-status-icon">ℹ️</span>
+                                <span id="relayStatusText">Auto mode — relay triggers when breath hold ≥ 5 s is detected.</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM-RIGHT: Hold-Breath Timer -->
+                <div class="pane" id="pane4">
+                    <div class="pane-header">⏱️ Breath-Hold Timer</div>
+                    <div class="pane-content">
+                        <div class="timer-pane">
+                            <div class="timer-label">Relay Active Duration</div>
+
+                            <div class="timer-display idle" id="timerDisplay">00:00.0</div>
+
+                            <div class="timer-state-badge idle" id="timerBadge">IDLE</div>
+
+                            <!-- Hold-detection progress bar (only shown in auto mode pre-trigger) -->
+                            <div class="hold-progress-wrap" id="holdProgressWrap" style="display:none;">
+                                <div class="hold-progress-label">
+                                    <span>Detecting hold…</span>
+                                    <span id="holdProgressSec">0 / 5 s</span>
+                                </div>
+                                <div class="hold-progress-track">
+                                    <div class="hold-progress-fill" id="holdProgressFill"></div>
+                                </div>
+                            </div>
+
+                            <div class="timer-sub" id="timerSub">
+                                Waiting for relay to activate.<br>
+                                Calibrate zero to reset timer.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ═══════════════════════════════════════════════════════
+           SOCKET + GLOBAL STATE
+        ═══════════════════════════════════════════════════════ */
+        const socket = io();
+
+        let timeWindowSeconds = 10;
+        let timeData = [];
+        let displacementData = [];
+        let monitoringActive = false;
+        let startTimestamp = null;
+        let scrollMode = 'auto';
+
+        /* ─── Relay state ─── */
+        let relayMode   = 'auto';   // 'auto' | 'manual'
+        let relayOn     = false;
+        let selectedPhase = 'inhale'; // 'inhale' | 'exhale'
+
+        /* ─── Timer state ─── */
+        let timerRunning     = false;
+        let timerStartMs     = null;
+        let timerFrozenValue = null;   // frozen display when stopped
+        let timerRAF         = null;
+
+        /* ─── Auto-hold detection ─── */
+        const HOLD_THRESHOLD_SEC = 5;
+        let holdStartTime = null;      // timestamp (ms) when hold began
+        let holdPhaseActive = false;   // currently in the selected phase without break
+
+        /* ═══════════════════════════════════════════════════════
+           SCROLL-TO-TOP
+        ═══════════════════════════════════════════════════════ */
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        window.addEventListener('scroll', () => {
+            scrollTopBtn.classList.toggle('visible', window.scrollY > 300);
+        });
+        scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+        /* ═══════════════════════════════════════════════════════
+           CHART.JS
+        ═══════════════════════════════════════════════════════ */
+        Chart.register(ChartZoom);
+        const ctx = document.getElementById('breathingGraph').getContext('2d');
+        const breathingChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'Chest Displacement (cm)',
+                    data: [],
+                    borderColor: '#38ef7d',
+                    backgroundColor: 'rgba(56,239,125,0.2)',
+                    borderWidth: 3,
+                    fill: true, tension: 0.1,
+                    pointRadius: 0, pointHoverRadius: 5,
+                    spanGaps: true
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: true, animation: false,
+                interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                scales: {
+                    y: {
+                        title: { display: true, text: 'Displacement (cm)', color: '#fff' },
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#fff', stepSize: 1, precision: 0,
+                            callback: v => v.toFixed(0) + ' cm'
+                        },
+                        min: -5, max: 5
+                    },
+                    x: {
+                        title: { display: true, text: 'Time (seconds)', color: '#fff' },
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#fff', callback: v => v.toFixed(0) + 's' },
+                        type: 'linear', position: 'bottom', min: 0, max: timeWindowSeconds
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#fff', font: { size: 10 } } },
+                    tooltip: {
+                        enabled: true, mode: 'index', intersect: false,
+                        callbacks: {
+                            label: c => `Displacement: ${c.parsed.y.toFixed(0)} cm`,
+                            title: c => `Time: ${c[0].parsed.x.toFixed(1)} seconds`
+                        }
+                    },
+                    zoom: {
+                        pan: {
+                            enabled: true, mode: 'x', speed: 10, threshold: 5,
+                            onPan() { if (scrollMode === 'auto') { scrollMode='manual'; updateScrollButtons(); showNotification('Manual mode activated. Click "Auto" to resume.','info'); } }
+                        },
+                        zoom: {
+                            wheel: { enabled: true, speed: 0.05 },
+                            pinch: { enabled: true },
+                            mode: 'x',
+                            onZoom() { if (scrollMode === 'auto') { scrollMode='manual'; updateScrollButtons(); showNotification('Manual zoom mode. Click "Auto" to resume.','info'); } },
+                            onZoomComplete() { breathingChart.update('none'); }
+                        },
+                        limits: { x: { min: 0, max: 300 }, y: { min: -10, max: 10 } }
+                    }
+                }
+            }
+        });
+
+        /* ═══════════════════════════════════════════════════════
+           GRAPH HELPERS
+        ═══════════════════════════════════════════════════════ */
+        function zoomIn() {
+            const mn = breathingChart.options.scales.x.min;
+            const mx = breathingChart.options.scales.x.max;
+            const c = (mn + mx) / 2; const r = (mx - mn) * 0.7;
+            breathingChart.options.scales.x.min = Math.max(0, c - r/2);
+            breathingChart.options.scales.x.max = c + r/2;
+            breathingChart.update('none');
+            if (scrollMode === 'auto') { scrollMode='manual'; updateScrollButtons(); showNotification('Manual zoom mode. Click "Auto" to resume.','info'); }
+        }
+        function zoomOut() {
+            const mn = breathingChart.options.scales.x.min;
+            const mx = breathingChart.options.scales.x.max;
+            const c = (mn + mx) / 2; const r = (mx - mn) * 1.5;
+            breathingChart.options.scales.x.min = Math.max(0, c - r/2);
+            breathingChart.options.scales.x.max = c + r/2;
+            breathingChart.update('none');
+            if (scrollMode === 'auto') { scrollMode='manual'; updateScrollButtons(); showNotification('Manual zoom mode. Click "Auto" to resume.','info'); }
+        }
+        function resetZoom() {
+            if (monitoringActive && startTimestamp) {
+                const ct = (Date.now() - startTimestamp) / 1000;
+                breathingChart.options.scales.x.min = Math.max(0, ct - timeWindowSeconds);
+                breathingChart.options.scales.x.max = ct;
+            } else {
+                breathingChart.options.scales.x.min = 0;
+                breathingChart.options.scales.x.max = timeWindowSeconds;
+            }
+            breathingChart.options.scales.y.min = -5;
+            breathingChart.options.scales.y.max = 5;
+            breathingChart.update('none');
+        }
+        function updateGraph() {
+            if (!monitoringActive) return;
+            if (timeData.length === 0) { breathingChart.data.datasets[0].data = []; breathingChart.update('none'); return; }
+            const ct = (Date.now() - startTimestamp) / 1000;
+            const ws = ct - timeWindowSeconds;
+            const pts = [];
+            for (let i = 0; i < timeData.length; i++) {
+                if (timeData[i] >= ws) pts.push({ x: timeData[i], y: displacementData[i] });
+            }
+            breathingChart.data.datasets[0].data = pts;
+            if (scrollMode === 'auto' && pts.length > 0) {
+                breathingChart.options.scales.x.min = Math.max(0, ct - timeWindowSeconds);
+                breathingChart.options.scales.x.max = ct;
+            }
+            if (pts.length > 5) {
+                const ry = pts.slice(-30).map(p => p.y);
+                const my = Math.max(...ry, 1); const miy = Math.min(...ry, -1);
+                const pd = Math.max(0.5, (my - miy) * 0.2);
+                breathingChart.options.scales.y.min = miy - pd;
+                breathingChart.options.scales.y.max = my + pd;
+            } else {
+                breathingChart.options.scales.y.min = -3; breathingChart.options.scales.y.max = 3;
+            }
+            breathingChart.update('none');
+            if (displacementData.length > 0)
+                document.getElementById('currentDisp').innerHTML = displacementData[displacementData.length - 1];
+        }
+        function calculateBreathingRate() {
+            if (displacementData.length < 20 || timeData.length < 20) return;
+            const ct = (Date.now() - startTimestamp) / 1000;
+            const ws = ct - 30;
+            const rd = []; const rt = [];
+            for (let i = 0; i < displacementData.length; i++) {
+                if (timeData[i] >= ws) { rd.push(displacementData[i]); rt.push(timeData[i]); }
+            }
+            if (rd.length < 15) return;
+            let peaks = 0;
+            for (let i = 2; i < rd.length - 2; i++) {
+                if (rd[i]>rd[i-1] && rd[i]>rd[i-2] && rd[i]>rd[i+1] && rd[i]>rd[i+2] && rd[i]>=1) peaks++;
+            }
+            if (peaks >= 2 && rt.length > 0) {
+                const ts = rt[rt.length-1] - rt[0];
+                if (ts > 10) {
+                    const rate = (peaks * 60) / ts;
+                    document.getElementById('breathRate').innerHTML = Math.round(Math.min(40, Math.max(5, rate)));
+                }
+            }
+        }
+        function updateScrollButtons() {
+            document.getElementById('scrollAutoBtn').classList.toggle('active', scrollMode === 'auto');
+            document.getElementById('scrollManualBtn').classList.toggle('active', scrollMode !== 'auto');
+        }
+        function resetToAutoScroll() {
+            scrollMode = 'auto'; updateScrollButtons(); resetZoom();
+            showNotification('Auto-scroll enabled. Graph will follow latest data.', 'success');
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           RING POSITION (visualizer)
+        ═══════════════════════════════════════════════════════ */
+        const movingRing = document.getElementById('movingRing');
+        function updateRingPosition(displacement) {
+            const maxD = 3, minTop = 50, maxTop = 250;
+            const clamped = Math.max(-maxD, Math.min(maxD, displacement));
+            const norm = (clamped + maxD) / (2 * maxD);
+            const topPos = maxTop - (norm * (maxTop - minTop));
+            movingRing.style.top = `${topPos}px`;
+            const phaseText = document.getElementById('phaseText');
+            if (displacement >= 1)       { phaseText.innerHTML = '🌬️ INHALING ↑'; phaseText.className = 'phase-text phase-inhale'; }
+            else if (displacement <= -1) { phaseText.innerHTML = '💨 EXHALING ↓'; phaseText.className = 'phase-text phase-exhale'; }
+            else                         { phaseText.innerHTML = '⏸️ PAUSE ●';     phaseText.className = 'phase-text phase-pause'; }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           RELAY HELPERS
+        ═══════════════════════════════════════════════════════ */
+        function setRelay(on) {
+            relayOn = on;
+            const btn  = document.getElementById('relayToggleBtn');
+            const dot  = document.getElementById('relayDot');
+            const lbl  = document.getElementById('relayBtnLabel');
+            if (on) {
+                btn.className = 'relay-toggle-btn on';
+                dot.className = 'relay-dot on';
+                lbl.textContent = 'RELAY ON';
+            } else {
+                btn.className = 'relay-toggle-btn off';
+                dot.className = 'relay-dot off';
+                lbl.textContent = 'RELAY OFF';
+            }
+        }
+
+        function updateRelayStatus(msg) {
+            document.getElementById('relayStatusText').textContent = msg;
+        }
+
+        /* ─── Manual relay toggle ─── */
+        document.getElementById('relayToggleBtn').addEventListener('click', () => {
+            if (relayMode !== 'manual') return;
+            if (relayOn) {
+                setRelay(false);
+                stopTimer();
+                updateRelayStatus('Manual — relay off. Press button to activate.');
+            } else {
+                setRelay(true);
+                startTimer();
+                updateRelayStatus('Manual — relay ON. Timer running. Press button to stop.');
+            }
+        });
+
+        /* ─── Mode buttons ─── */
+        document.getElementById('relayAutoBtn').addEventListener('click', () => {
+            relayMode = 'auto';
+            document.getElementById('relayAutoBtn').classList.add('active');
+            document.getElementById('relayManualBtn').classList.remove('active');
+            // reset state
+            if (relayOn) { setRelay(false); stopTimer(); }
+            holdStartTime = null; holdPhaseActive = false;
+            document.getElementById('holdProgressWrap').style.display = 'none';
+            updateRelayStatus('Auto mode — relay triggers when breath hold ≥ 5 s is detected.');
+        });
+        document.getElementById('relayManualBtn').addEventListener('click', () => {
+            relayMode = 'manual';
+            document.getElementById('relayManualBtn').classList.add('active');
+            document.getElementById('relayAutoBtn').classList.remove('active');
+            // stop any auto relay
+            if (relayOn) { setRelay(false); stopTimer(); }
+            holdStartTime = null; holdPhaseActive = false;
+            document.getElementById('holdProgressWrap').style.display = 'none';
+            updateRelayStatus('Manual mode — press the relay button to toggle.');
+        });
+
+        /* ─── Phase radio ─── */
+        document.querySelectorAll('input[name="breathPhase"]').forEach(r => {
+            r.addEventListener('change', () => {
+                selectedPhase = r.value;
+                holdStartTime = null; holdPhaseActive = false;
+                if (relayOn && relayMode === 'auto') {
+                    setRelay(false); stopTimer();
+                    updateRelayStatus(`Auto mode — now monitoring for ${selectedPhase} hold ≥ 5 s.`);
+                }
+            });
+        });
+
+        /* ═══════════════════════════════════════════════════════
+           TIMER HELPERS
+        ═══════════════════════════════════════════════════════ */
+        function fmtTime(ms) {
+            const total = ms / 1000;
+            const m = Math.floor(total / 60);
+            const s = Math.floor(total % 60);
+            const d = Math.floor((total % 1) * 10);
+            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${d}`;
+        }
+
+        function startTimer() {
+            timerFrozenValue = null;
+            timerStartMs = Date.now();
+            timerRunning = true;
+            const el  = document.getElementById('timerDisplay');
+            const bdg = document.getElementById('timerBadge');
+            const sub = document.getElementById('timerSub');
+            el.className  = 'timer-display running';
+            bdg.className = 'timer-state-badge running';
+            bdg.textContent = 'RUNNING';
+            sub.textContent = 'Relay is active. Timer counts relay-on duration.';
+
+            function tick() {
+                if (!timerRunning) return;
+                el.textContent = fmtTime(Date.now() - timerStartMs);
+                timerRAF = requestAnimationFrame(tick);
+            }
+            cancelAnimationFrame(timerRAF);
+            timerRAF = requestAnimationFrame(tick);
+        }
+
+        function stopTimer() {
+            timerRunning = false;
+            cancelAnimationFrame(timerRAF);
+            const el  = document.getElementById('timerDisplay');
+            const bdg = document.getElementById('timerBadge');
+            const sub = document.getElementById('timerSub');
+            if (timerStartMs) {
+                timerFrozenValue = Date.now() - timerStartMs;
+                el.textContent = fmtTime(timerFrozenValue);
+            }
+            el.className  = timerFrozenValue ? 'timer-display stopped' : 'timer-display idle';
+            bdg.className = timerFrozenValue ? 'timer-state-badge stopped' : 'timer-state-badge idle';
+            bdg.textContent = timerFrozenValue ? 'STOPPED' : 'IDLE';
+            sub.textContent = timerFrozenValue
+                ? 'Showing last relay-on duration. Calibrate zero to reset.'
+                : 'Waiting for relay to activate.\nCalibrate zero to reset timer.';
+        }
+
+        function resetTimer() {
+            timerRunning = false; timerStartMs = null; timerFrozenValue = null;
+            cancelAnimationFrame(timerRAF);
+            const el  = document.getElementById('timerDisplay');
+            const bdg = document.getElementById('timerBadge');
+            const sub = document.getElementById('timerSub');
+            el.textContent = '00:00.0';
+            el.className  = 'timer-display idle';
+            bdg.className = 'timer-state-badge idle';
+            bdg.textContent = 'IDLE';
+            sub.textContent = 'Waiting for relay to activate.\nCalibrate zero to reset timer.';
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           AUTO HOLD DETECTION
+        ═══════════════════════════════════════════════════════ */
+        function processAutoHold(displacement) {
+            if (relayMode !== 'auto') return;
+
+            const phase = displacement >= 1 ? 'inhale'
+                        : displacement <= -1 ? 'exhale'
+                        : 'pause';
+
+            const inTargetPhase = (phase === selectedPhase);
+
+            if (!relayOn) {
+                // Waiting for 5-second hold
+                if (inTargetPhase) {
+                    if (!holdPhaseActive) {
+                        holdPhaseActive = true;
+                        holdStartTime = Date.now();
+                    }
+                    const elapsed = (Date.now() - holdStartTime) / 1000;
+                    const pct = Math.min(100, (elapsed / HOLD_THRESHOLD_SEC) * 100);
+
+                    // Show progress bar
+                    document.getElementById('holdProgressWrap').style.display = 'block';
+                    document.getElementById('holdProgressFill').style.width = pct + '%';
+                    document.getElementById('holdProgressSec').textContent =
+                        `${elapsed.toFixed(1)} / ${HOLD_THRESHOLD_SEC} s`;
+
+                    if (elapsed >= HOLD_THRESHOLD_SEC) {
+                        // TRIGGER!
+                        setRelay(true);
+                        startTimer();
+                        document.getElementById('holdProgressWrap').style.display = 'none';
+                        updateRelayStatus(`Auto — ${selectedPhase} hold detected (${HOLD_THRESHOLD_SEC}s). Relay ON, timer running.`);
+                        showNotification(`🔴 Relay triggered: ${selectedPhase} hold detected!`, 'success');
+                    } else {
+                        updateRelayStatus(`Auto — detecting ${selectedPhase} hold… ${elapsed.toFixed(1)} / ${HOLD_THRESHOLD_SEC} s`);
+                    }
+                } else {
+                    // Phase broken — reset hold counter
+                    if (holdPhaseActive) {
+                        holdPhaseActive = false;
+                        holdStartTime = null;
+                        document.getElementById('holdProgressWrap').style.display = 'none';
+                        document.getElementById('holdProgressFill').style.width = '0%';
+                        updateRelayStatus(`Auto mode — monitoring for ${selectedPhase} hold ≥ ${HOLD_THRESHOLD_SEC} s.`);
+                    }
+                }
+            } else {
+                // Relay is ON — watch for breathing pattern change (non-target phase)
+                if (!inTargetPhase && phase !== 'pause') {
+                    setRelay(false);
+                    stopTimer();
+                    holdPhaseActive = false; holdStartTime = null;
+                    document.getElementById('holdProgressWrap').style.display = 'none';
+                    updateRelayStatus(`Auto — breathing pattern changed. Relay OFF.`);
+                    showNotification('⚪ Relay off: breathing resumed.', 'info');
+                }
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           SOCKET EVENTS
+        ═══════════════════════════════════════════════════════ */
+        socket.on('connect', () => {
+            document.getElementById('statusBadge').innerHTML = 'Connected';
+            document.getElementById('statusBadge').style.background = 'rgba(56,239,125,0.3)';
+        });
+        socket.on('disconnect', () => {
+            document.getElementById('statusBadge').innerHTML = 'Disconnected';
+            document.getElementById('statusBadge').style.background = 'rgba(235,51,73,0.3)';
+        });
+        socket.on('calibration_status', (data) => {
+            if (data.calibrated) {
+                showNotification('Calibration Complete! Zero point set.', 'success');
+                // Reset timer on new calibration
+                if (relayOn) { setRelay(false); }
+                resetTimer();
+                holdPhaseActive = false; holdStartTime = null;
+                document.getElementById('holdProgressWrap').style.display = 'none';
+                document.getElementById('holdProgressFill').style.width = '0%';
+            } else {
+                showNotification('Please calibrate — have patient lie still and click calibrate.', 'warning');
+            }
+        });
+        socket.on('calibration_complete', (data) => {
+            if (data && data.zero_value !== undefined)
+                document.getElementById('zeroValue').innerHTML = data.zero_value;
+            showNotification(data.message || 'Calibration complete!', 'success');
+            resetTimer();
+        });
+        socket.on('sensor_data', (data) => {
+            const displacement = data.displacement;
+            if (monitoringActive && startTimestamp) {
+                const ct = (Date.now() - startTimestamp) / 1000;
+                timeData.push(ct);
+                displacementData.push(displacement);
+                const maxAge = 300;
+                while (timeData.length > 0 && timeData[0] < ct - maxAge) { timeData.shift(); displacementData.shift(); }
+                updateGraph();
+                calculateBreathingRate();
+            }
+            updateRingPosition(displacement);
+            processAutoHold(displacement);
+        });
+        socket.on('patient_data', (data) => {
+            // (patient vitals pane removed — data still received but not displayed)
+        });
+
+        /* ═══════════════════════════════════════════════════════
+           HEADER BUTTON HANDLERS
+        ═══════════════════════════════════════════════════════ */
+        document.getElementById('calibrateBtn').onclick = () => {
+            showNotification('Calibrating zero point… Please keep patient still.', 'info');
+            socket.emit('calibrate');
+        };
+        document.getElementById('startBtn').onclick = () => {
+            monitoringActive = true; startTimestamp = Date.now();
+            timeData = []; displacementData = [];
+            breathingChart.data.datasets[0].data = [];
+            scrollMode = 'auto'; updateScrollButtons();
+            socket.emit('start_streaming');
+            showNotification('Monitoring Started! Watch the green waveform appear.', 'success');
+        };
+        document.getElementById('stopBtn').onclick = () => {
+            monitoringActive = false;
+            socket.emit('stop_streaming');
+            if (relayOn && relayMode === 'auto') { setRelay(false); stopTimer(); }
+            showNotification('Monitoring Stopped', 'info');
+        };
+
+        /* ═══════════════════════════════════════════════════════
+           GRAPH TIME/ZOOM CONTROLS
+        ═══════════════════════════════════════════════════════ */
+        document.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                timeWindowSeconds = parseInt(btn.dataset.seconds);
+                if (scrollMode === 'auto') resetZoom();
+                updateGraph();
+            });
+        });
+        document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
+        document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
+        document.getElementById('resetZoomBtn').addEventListener('click', resetZoom);
+        document.getElementById('scrollAutoBtn').addEventListener('click', resetToAutoScroll);
+        document.getElementById('scrollManualBtn').addEventListener('click', () => {
+            scrollMode = 'manual'; updateScrollButtons();
+            showNotification('Manual scroll mode. Use mouse wheel or drag to pan/zoom.', 'info');
+        });
+
+        /* ═══════════════════════════════════════════════════════
+           SPLIT.JS
+        ═══════════════════════════════════════════════════════ */
+        setTimeout(() => {
+            try {
+                Split(['#topRow','#bottomRow'], { direction:'vertical', gutterSize:6, snapOffset:30, cursor:'row-resize', minSize:300 });
+                Split(['#pane1','#pane2'],     { direction:'horizontal', gutterSize:6, snapOffset:30, cursor:'col-resize', minSize:250 });
+                Split(['#pane3','#pane4'],     { direction:'horizontal', gutterSize:6, snapOffset:30, cursor:'col-resize', minSize:250 });
+            } catch(e) { console.log('Split init:', e); }
+        }, 100);
+
+        /* ═══════════════════════════════════════════════════════
+           NOTIFICATION
+        ═══════════════════════════════════════════════════════ */
+        function showNotification(message, type) {
+            const n = document.createElement('div');
+            n.style.cssText = `position:fixed;top:80px;right:20px;padding:12px 20px;border-radius:8px;
+                z-index:9999;font-weight:bold;animation:slideIn 0.3s ease;`;
+            n.style.background = type === 'success' ? 'linear-gradient(135deg,#11998e,#38ef7d)'
+                                : type === 'error'   ? 'linear-gradient(135deg,#eb3349,#f45c43)'
+                                : 'linear-gradient(135deg,#667eea,#764ba2)';
+            n.innerHTML = message;
+            document.body.appendChild(n);
+            setTimeout(() => { n.style.opacity='0'; setTimeout(() => n.remove(), 300); }, 3000);
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           INIT
+        ═══════════════════════════════════════════════════════ */
+        movingRing.style.top = '150px';
+
+        function animate() {
+            if (monitoringActive) updateGraph();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.addEventListener('beforeunload', () => socket.emit('stop_streaming'));
+
+        setTimeout(() => resetZoom(), 500);
+        /* ═══════════════════════════════════════════════════════
+   PERFORMANCE OPTIMIZATIONS
+   ═══════════════════════════════════════════════════════ */
+
+// Throttle graph updates for smoother rendering
+let lastGraphUpdate = 0;
+const GRAPH_UPDATE_INTERVAL = 50; // ms (20fps for graph)
+
+// Override the sensor_data handler with optimized version
+const originalSensorHandler = socket._callbacks['$sensor_data'];
+socket.off('sensor_data');
+
+socket.on('sensor_data', (data) => {
+    const displacement = data.displacement;
+    const now = performance.now();
+    
+    // Always update ring position immediately (low cost)
+    updateRingPosition(displacement);
+    
+    // Process auto-hold immediately
+    processAutoHold(displacement);
+    
+    // Throttle graph updates
+    if (now - lastGraphUpdate >= GRAPH_UPDATE_INTERVAL) {
+        if (monitoringActive && startTimestamp) {
+            const ct = (Date.now() - startTimestamp) / 1000;
+            timeData.push(ct);
+            displacementData.push(displacement);
+            
+            // Keep last 60 seconds max
+            const maxAge = 60;
+            while (timeData.length > 0 && timeData[0] < ct - maxAge) {
+                timeData.shift();
+                displacementData.shift();
+            }
+            
+            updateGraphImmediate();
+            calculateBreathingRate();
+        }
+        lastGraphUpdate = now;
+    }
+});
+
+// Optimized graph update without extra calculations
+function updateGraphImmediate() {
+    if (!monitoringActive || timeData.length === 0) return;
+    
+    const ct = (Date.now() - startTimestamp) / 1000;
+    const ws = ct - timeWindowSeconds;
+    
+    // Build points array efficiently
+    const pts = [];
+    const dataLen = timeData.length;
+    for (let i = 0; i < dataLen; i++) {
+        if (timeData[i] >= ws) {
+            pts.push({ x: timeData[i], y: displacementData[i] });
+        }
+    }
+    
+    breathingChart.data.datasets[0].data = pts;
+    
+    // Update x-axis range for auto-scroll
+    if (scrollMode === 'auto' && pts.length > 0) {
+        breathingChart.options.scales.x.min = Math.max(0, ct - timeWindowSeconds);
+        breathingChart.options.scales.x.max = ct;
+    }
+    
+    // Update current displacement display
+    if (displacementData.length > 0) {
+        document.getElementById('currentDisp').innerHTML = displacementData[displacementData.length - 1];
+    }
+    
+    // Only request chart update, not full re-render
+    breathingChart.update('none');
+}
+
+// Increase ring update responsiveness
+const originalRingUpdate = updateRingPosition;
+window.updateRingPosition = function(displacement) {
+    const maxD = 5, minTop = 30, maxTop = 270;  // Extended range for better visual response
+    const clamped = Math.max(-maxD, Math.min(maxD, displacement));
+    const norm = (clamped + maxD) / (2 * maxD);
+    const topPos = maxTop - (norm * (maxTop - minTop));
+    movingRing.style.top = `${topPos}px`;
+    
+    const phaseText = document.getElementById('phaseText');
+    if (displacement >= 1) {
+        phaseText.innerHTML = '🌬️ INHALING ↑';
+        phaseText.className = 'phase-text phase-inhale';
+    } else if (displacement <= -1) {
+        phaseText.innerHTML = '💨 EXHALING ↓';
+        phaseText.className = 'phase-text phase-exhale';
+    } else {
+        phaseText.innerHTML = '⏸️ PAUSE ●';
+        phaseText.className = 'phase-text phase-pause';
+    }
+};
+
+// Optimize breathing rate calculation (run less frequently)
+let lastRateCalc = 0;
+const originalRateCalc = calculateBreathingRate;
+window.calculateBreathingRate = function() {
+    const now = performance.now();
+    if (now - lastRateCalc < 500) return;  // Calculate every 500ms max
+    lastRateCalc = now;
+    
+    if (displacementData.length < 15 || timeData.length < 15) return;
+    
+    const ct = (Date.now() - startTimestamp) / 1000;
+    const ws = ct - 15;  // Use 15 second window for faster response
+    
+    const rd = [];
+    const rt = [];
+    for (let i = 0; i < displacementData.length; i++) {
+        if (timeData[i] >= ws) {
+            rd.push(displacementData[i]);
+            rt.push(timeData[i]);
+        }
+    }
+    
+    if (rd.length < 10) return;
+    
+    // Faster peak detection
+    let peaks = 0;
+    const len = rd.length;
+    for (let i = 2; i < len - 2; i++) {
+        if (rd[i] > rd[i-1] && rd[i] > rd[i-2] && 
+            rd[i] > rd[i+1] && rd[i] > rd[i+2] && 
+            rd[i] >= 1) {
+            peaks++;
+        }
+    }
+    
+    if (peaks >= 2 && rt.length > 0) {
+        const ts = rt[rt.length-1] - rt[0];
+        if (ts > 5) {
+            const rate = (peaks * 60) / ts;
+            document.getElementById('breathRate').innerHTML = Math.round(Math.min(40, Math.max(5, rate)));
+        }
+    }
+};
+
+// WebSocket connection optimization
+socket.io.opts.transports = ['websocket'];  // Force WebSocket only
+socket.io.opts.timeout = 5000;
+socket.io.opts.reconnectionAttempts = 3;
+
+console.log('Low-latency optimizations enabled');
+        
+    </script>
+</body>
+</html>
