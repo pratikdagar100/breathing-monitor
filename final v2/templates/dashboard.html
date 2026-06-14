@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Respiratory Monitoring System | AI Medical Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
+    <style>
+        :root {
+            --bg-base:       #060e1a;
+            --bg-panel:      #0b1628;
+            --bg-panel-alt:  #0d1c35;
+            --border:        rgba(0, 212, 200, 0.15);
+            --border-dim:    rgba(255, 255, 255, 0.06);
+            --teal:          #00d4c8;
+            --teal-dim:      rgba(0, 212, 200, 0.12);
+            --teal-mid:      rgba(0, 212, 200, 0.35);
+            --blue:          #1a73e8;
+            --blue-dim:      rgba(26, 115, 232, 0.15);
+            --green:         #00e676;
+            --green-dim:     rgba(0, 230, 118, 0.15);
+            --red:           #ff3b5c;
+            --red-dim:       rgba(255, 59, 92, 0.15);
+            --amber:         #ffb547;
+            --amber-dim:     rgba(255, 181, 71, 0.15);
+            --text-primary:  #e8f0fe;
+            --text-secondary:#8faac8;
+            --text-muted:    #4a6080;
+            --font-mono:     'JetBrains Mono', 'Courier New', monospace;
+            --font-ui:       'Inter', -apple-system, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg-base);
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(0,212,200,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,212,200,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none; z-index: 0;
+        }
+
+        body::-webkit-scrollbar { width: 6px; }
+        body::-webkit-scrollbar-track { background: var(--bg-base); }
+        body::-webkit-scrollbar-thumb { background: var(--teal-mid); border-radius: 3px; }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            position: relative;
+            z-index: 1;
+            gap: 12px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-panel);
+            padding: 0 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 12px;
+            z-index: 100;
+            height: 64px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(0,212,200,0.1);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                var(--teal) 30%,
+                var(--teal) 32%,
+                transparent 34%,
+                transparent 38%,
+                var(--teal) 39%,
+                transparent 41%,
+                transparent 100%);
+            background-size: 200% 100%;
+            animation: ecgScan 3s linear infinite;
+            opacity: 0.8;
+            border-radius: 8px 8px 0 0;
+        }
+
+        @keyframes ecgScan {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; }
+
+        .brand-mark {
+            width: 38px; height: 38px;
+            border: 1.5px solid var(--teal);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--teal);
+            font-size: 1.1rem;
+            background: var(--teal-dim);
+            box-shadow: 0 0 12px rgba(0,212,200,0.25);
+            flex-shrink: 0;
+        }
+
+        .title h1 {
+            font-family: var(--font-ui);
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            color: var(--text-primary);
+        }
+        .title p {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-top: 1px;
+        }
+
+        .patient-info-badge {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-dim);
+            border-radius: 5px;
+            padding: 4px 12px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--teal);
+        }
+
+        .header-divider {
+            width: 1px; height: 32px;
+            background: var(--border-dim);
+        }
+
+        .header-vitals {
+            display: flex; gap: 8px; align-items: center;
+        }
+        .vital-chip {
+            display: flex; flex-direction: column;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 5px;
+            border: 1px solid var(--border-dim);
+            background: rgba(0,0,0,0.2);
+            min-width: 70px;
+        }
+        .vital-chip-label {
+            font-family: var(--font-mono);
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .vital-chip-value {
+            font-family: var(--font-mono);
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--green);
+            letter-spacing: 0.05em;
+        }
+
+        .controls {
+            display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid transparent;
+            border-radius: 5px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .btn-primary {
+            background: var(--blue-dim);
+            color: #6ab3ff;
+            border-color: rgba(26,115,232,0.4);
+        }
+        .btn-primary:hover {
+            background: rgba(26,115,232,0.25);
+            border-color: var(--blue);
+            box-shadow: 0 0 12px rgba(26,115,232,0.3);
+        }
+        .btn-success {
+            background: var(--green-dim);
+            color: var(--green);
+            border-color: rgba(0,230,118,0.35);
+        }
+        .btn-success:hover {
+            background: rgba(0,230,118,0.25);
+            box-shadow: 0 0 12px rgba(0,230,118,0.3);
+        }
+        .btn-danger {
+            background: var(--red-dim);
+            color: var(--red);
+            border-color: rgba(255,59,92,0.35);
+        }
+        .btn-danger:hover {
+            background: rgba(255,59,92,0.25);
+            box-shadow: 0 0 12px rgba(255,59,92,0.3);
+        }
+        .btn-warning {
+            background: var(--amber-dim);
+            color: var(--amber);
+            border-color: rgba(255,181,71,0.35);
+        }
+        .btn-warning:hover {
+            background: rgba(255,181,71,0.25);
+            box-shadow: 0 0 12px rgba(255,181,71,0.3);
+        }
+
+        .status-badge {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: 1px solid rgba(255,59,92,0.4);
+            background: var(--red-dim);
+            color: var(--red);
+        }
+        .status-badge.connected {
+            border-color: rgba(0,230,118,0.4);
+            background: var(--green-dim);
+            color: var(--green);
+        }
+
+        /* MODAL STYLES */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 480px;
+            padding: 28px 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: modalSlideIn 0.3s ease;
+        }
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-dim);
+            padding-bottom: 12px;
+        }
+        .modal-header h2 {
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            color: var(--teal);
+            letter-spacing: 0.05em;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .modal-close:hover { color: var(--red); }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-dim);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: var(--font-ui);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--teal);
+            box-shadow: 0 0 8px rgba(0,212,200,0.3);
+        }
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .modal-footer .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* Split container and panes (keeping original styles) */
+        .split-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .row {
+            display: flex;
+            flex: 1;
+            gap: 0;
+            min-height: 380px;
+        }
+
+        .pane {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-dim);
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            position: relative;
+            min-height: 280px;
+        }
+
+        .pane:first-child { border-radius: 8px 0 0 8px; }
+        .pane:last-child  { border-radius: 0 8px 8px 0; }
+
+        #topRow    .pane { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: none; }
+        #bottomRow .pane { border-top-left-radius: 0; border-top-right-radius: 0; }
+
+        .pane-header {
+            padding: 10px 18px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid var(--border-dim);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--teal);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .pane-header-icon {
+            width: 18px; height: 18px;
+            border: 1px solid var(--teal-mid);
+            border-radius: 3px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem;
+            color: var(--teal);
+            background: var(--teal-dim);
+        }
+
+        .pane-content {
+            flex: 1; overflow: auto;
+            padding: 16px;
+            min-height: 200px;
+        }
+
+        .gutter {
+            background: rgba(0,212,200,0.08);
+            transition: background 0.2s;
+        }
+        .gutter:hover { background: rgba(0,212,200,0.2); }
+        .gutter.gutter-horizontal { cursor: col-resize; width: 4px; }
+        .gutter.gutter-vertical   { cursor: row-resize; height: 4px; }
+
+        /* Cylinder visualizer (keeping original) */
+        .cylinder-container {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            height: 100%; position: relative;
+            min-height: 320px;
+            gap: 0;
+        }
+
+        .lung-viz-wrap {
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .lung-glow-ring {
+            position: absolute;
+            width: 240px; height: 340px;
+            border: 1px solid rgba(0,212,200,0.15);
+            border-radius: 120px / 60px;
+            box-shadow: 0 0 30px rgba(0,212,200,0.08),
+                        inset 0 0 30px rgba(0,212,200,0.04);
+        }
+
+        .cylinder {
+            position: relative;
+            width: 190px; height: 300px;
+            background: linear-gradient(180deg,
+                #0a1f35 0%,
+                #0d2a48 40%,
+                #0a1f35 100%);
+            border-radius: 95px / 48px;
+            box-shadow:
+                inset -6px 0 20px rgba(0,0,0,0.5),
+                inset 6px 0 12px rgba(0,212,200,0.06),
+                0 10px 40px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .cylinder::after {
+            content: '';
+            position: absolute;
+            left: 22px; top: 0; bottom: 0; width: 18px;
+            background: linear-gradient(180deg,
+                rgba(0,212,200,0.12) 0%,
+                rgba(0,212,200,0.05) 50%,
+                rgba(0,212,200,0.12) 100%);
+            border-radius: 50%;
+        }
+
+        .cylinder-cap-top {
+            position: absolute;
+            top: -16px; left: 50%; transform: translateX(-50%);
+            width: 190px; height: 32px;
+            background: radial-gradient(ellipse at center,
+                rgba(0,212,200,0.35) 0%,
+                rgba(0,212,200,0.05) 70%,
+                transparent 100%);
+            border-radius: 50%;
+        }
+
+        .cylinder-cap-bottom {
+            position: absolute;
+            bottom: -16px; left: 50%; transform: translateX(-50%);
+            width: 190px; height: 32px;
+            background: radial-gradient(ellipse at center,
+                rgba(0,0,0,0.6) 0%,
+                transparent 70%);
+            border-radius: 50%;
+        }
+
+        .cylinder-ticks {
+            position: absolute;
+            right: 10px; top: 20px; bottom: 20px;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .cylinder-tick {
+            width: 8px; height: 1px;
+            background: rgba(0,212,200,0.2);
+        }
+
+        .moving-ring {
+            position: absolute;
+            width: 210px; height: 12px;
+            left: -10px;
+            background: linear-gradient(90deg, transparent, var(--teal), var(--teal), transparent);
+            border-radius: 6px;
+            transition: top 0.05s linear;
+            box-shadow:
+                0 0 16px rgba(0,212,200,0.9),
+                0 0 40px rgba(0,212,200,0.4);
+            z-index: 10;
+        }
+
+        .cylinder-scale {
+            position: absolute;
+            right: -44px; top: 0; bottom: 0;
+            display: flex; flex-direction: column; justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px 0;
+        }
+        .scale-label {
+            font-family: var(--font-mono);
+            font-size: 0.58rem;
+            color: var(--text-muted);
+            line-height: 1;
+        }
+
+        .phase-readout {
+            margin-top: 24px;
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+        }
+
+        .phase-text {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+        .phase-inhale { color: var(--green);  text-shadow: 0 0 14px rgba(0,230,118,0.6); }
+        .phase-exhale { color: var(--red);    text-shadow: 0 0 14px rgba(255,59,92,0.6); }
+        .phase-pause  { color: var(--amber);  text-shadow: 0 0 14px rgba(255,181,71,0.6); }
+
+        .phase-legend {
+            display: flex; gap: 16px;
+            margin-top: 4px;
+        }
+        .phase-legend-item {
+            display: flex; align-items: center; gap: 5px;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-muted);
+        }
+        .phase-legend-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+        }
+
+        /* Graph pane */
+        #breathingGraph {
+            width: 100%; height: 100%;
+            min-height: 280px;
+        }
+
+        .graph-controls {
+            display: flex; gap: 8px; margin-bottom: 10px;
+            align-items: center; flex-wrap: wrap;
+        }
+
+        .graph-controls-group {
+            display: flex; gap: 4px; align-items: center;
+        }
+
+        .ctrl-divider {
+            width: 1px; height: 20px;
+            background: var(--border-dim);
+            margin: 0 4px;
+        }
+
+        .time-btn {
+            padding: 4px 10px;
+            background: transparent;
+            border: 1px solid var(--border-dim);
+            border-radius: 3px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.05em;
+            transition: all 0.15s;
+        }
+        .time-btn.active {
+            background: var(--teal-dim);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        .time-btn:hover:not(.active) {
+            border-color: var(--border);
+            color: var(--text-secondary);
+        }
+
+        .zoom-btn {
+            padding: 4px 10px;
+            background: transparent;
+            border: 1px solid var(--border-dim);
+            border-radius: 3px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            transition: all 0.15s;
+        }
+        .zoom-btn:hover {
+            border-color: var(--border);
+            color: var(--text-secondary);
+        }
+
+        .scroll-btn {
+            padding: 4px 10px;
+            background: transparent;
+            border: 1px solid var(--border-dim);
+            border-radius: 3px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            transition: all 0.15s;
+        }
+        .scroll-btn.active {
+            background: var(--blue-dim);
+            border-color: rgba(26,115,232,0.5);
+            color: #6ab3ff;
+        }
+
+        .stats {
+            margin-left: auto;
+            display: flex; gap: 8px; align-items: center;
+        }
+        .stat-item {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-dim);
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+        .stat-item span {
+            color: var(--teal);
+            font-weight: 600;
+        }
+
+        .graph-tip {
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            letter-spacing: 0.04em;
+        }
+
+        .live-indicator {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+            animation: livePulse 1.2s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%,100% { opacity: 1; transform: scale(1); }
+            50%      { opacity: 0.4; transform: scale(1.3); }
+        }
+
+        /* Data Log Section */
+        .data-log-section {
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        .data-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+        .data-log-list {
+            max-height: 120px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+        }
+        .data-log-item {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border-dim);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+        }
+        .data-log-item:hover {
+            background: var(--teal-dim);
+            color: var(--teal);
+        }
+        .data-log-item .log-date {
+            color: var(--text-muted);
+        }
+
+        /* Relay controls (keeping original) */
+        .relay-panel {
+            display: flex; flex-direction: column;
+            height: 100%; gap: 16px; padding: 2px;
+        }
+
+        .relay-section-label {
+            font-family: var(--font-mono);
+            font-size: 0.6rem; font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .relay-phase-group {
+            display: flex; gap: 10px;
+        }
+        .relay-phase-option {
+            flex: 1; position: relative;
+        }
+        .relay-phase-option input[type="radio"] { display: none; }
+        .relay-phase-option label {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 11px 10px;
+            border-radius: 6px; cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.75rem; font-weight: 600;
+            letter-spacing: 0.06em;
+            border: 1px solid var(--border-dim);
+            background: rgba(0,0,0,0.2);
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .relay-phase-option input[type="radio"]:checked + label {
+            border-color: rgba(0,212,200,0.5);
+            background: var(--teal-dim);
+            color: var(--teal);
+            box-shadow: 0 0 14px rgba(0,212,200,0.2);
+        }
+        .relay-phase-option label:hover {
+            border-color: var(--border);
+            background: rgba(0,0,0,0.35);
+        }
+
+        .relay-btn-wrap { display: flex; justify-content: center; }
+        .relay-toggle-btn {
+            width: 100%; max-width: 300px; padding: 14px 24px;
+            border: 1.5px solid;
+            border-radius: 7px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem; font-weight: 700;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            text-transform: uppercase;
+        }
+        .relay-toggle-btn.off {
+            background: var(--red-dim);
+            border-color: rgba(255,59,92,0.45);
+            color: var(--red);
+            box-shadow: 0 0 16px rgba(255,59,92,0.2);
+        }
+        .relay-toggle-btn.on {
+            background: var(--green-dim);
+            border-color: rgba(0,230,118,0.45);
+            color: var(--green);
+            box-shadow: 0 0 20px rgba(0,230,118,0.3);
+            animation: relayActivePulse 1.6s ease-in-out infinite;
+        }
+        @keyframes relayActivePulse {
+            0%,100% { box-shadow: 0 0 20px rgba(0,230,118,0.3); }
+            50%      { box-shadow: 0 0 35px rgba(0,230,118,0.55); }
+        }
+        .relay-toggle-btn:hover { transform: translateY(-1px); }
+        .relay-toggle-btn:active { transform: translateY(0); }
+
+        .relay-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+        }
+        .relay-dot.on  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+        .relay-dot.off { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+
+        .relay-mode-group {
+            display: flex; gap: 8px;
+        }
+        .relay-mode-btn {
+            flex: 1; padding: 10px;
+            border-radius: 5px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem; font-weight: 600;
+            letter-spacing: 0.08em;
+            border: 1px solid var(--border-dim);
+            background: rgba(0,0,0,0.2);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        .relay-mode-btn:hover {
+            border-color: var(--border);
+            color: var(--text-primary);
+        }
+        .relay-mode-btn.active {
+            border-color: rgba(255,59,92,0.45);
+            background: var(--red-dim);
+            color: var(--red);
+        }
+
+        .relay-status-bar {
+            padding: 10px 14px;
+            border-radius: 5px;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid var(--border-dim);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            line-height: 1.5;
+            min-height: 44px;
+            display: flex; align-items: center; gap: 8px;
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
+        }
+
+        /* Timer pane */
+        .timer-pane {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            height: 100%; gap: 16px; min-height: 280px;
+        }
+
+        .timer-label {
+            font-family: var(--font-mono);
+            font-size: 0.6rem; letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted); font-weight: 600;
+        }
+
+        .timer-ring-wrap {
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .timer-ring-svg {
+            position: absolute;
+            width: 160px; height: 160px;
+            transform: rotate(-90deg);
+        }
+
+        .timer-ring-bg {
+            fill: none;
+            stroke: rgba(255,255,255,0.05);
+            stroke-width: 3;
+        }
+        .timer-ring-fill {
+            fill: none;
+            stroke: var(--teal);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke 0.3s;
+        }
+        .timer-ring-fill.running { stroke: var(--green); }
+        .timer-ring-fill.stopped { stroke: var(--amber); }
+
+        .timer-display {
+            font-family: var(--font-mono);
+            font-size: 3.6rem; font-weight: 700;
+            letter-spacing: 0.02em;
+            font-variant-numeric: tabular-nums;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+        .timer-display.running {
+            color: var(--green);
+            text-shadow: 0 0 30px rgba(0,230,118,0.5);
+        }
+        .timer-display.stopped {
+            color: var(--amber);
+            text-shadow: 0 0 30px rgba(255,181,71,0.5);
+        }
+        .timer-display.idle {
+            color: rgba(255,255,255,0.15);
+            text-shadow: none;
+        }
+
+        .timer-state-badge {
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.65rem; font-weight: 700;
+            letter-spacing: 0.12em; text-transform: uppercase;
+        }
+        .timer-state-badge.idle    { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border-dim); }
+        .timer-state-badge.running { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,230,118,0.35); }
+        .timer-state-badge.stopped { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(255,181,71,0.35); }
+
+        .timer-sub {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-align: center;
+            max-width: 220px; line-height: 1.6;
+            letter-spacing: 0.02em;
+        }
+
+        .hold-progress-wrap {
+            width: 75%; max-width: 260px;
+        }
+        .hold-progress-label {
+            display: flex; justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 0.6rem; color: var(--text-muted);
+            letter-spacing: 0.06em; margin-bottom: 5px;
+        }
+        .hold-progress-track {
+            height: 4px; background: rgba(255,255,255,0.07);
+            border-radius: 2px; overflow: hidden;
+        }
+        .hold-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--teal), var(--amber));
+            border-radius: 2px;
+            transition: width 0.2s linear;
+            width: 0%;
+        }
+
+        .scroll-top-btn {
+            position: fixed; bottom: 24px; right: 24px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            color: var(--teal);
+            width: 40px; height: 40px;
+            border-radius: 5px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 16px rgba(0,212,200,0.2);
+            transition: all 0.25s ease;
+            z-index: 1000; font-size: 16px;
+            opacity: 0; visibility: hidden;
+            font-family: var(--font-mono);
+        }
+        .scroll-top-btn.visible { opacity: 1; visibility: visible; }
+        .scroll-top-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 24px rgba(0,212,200,0.4);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(110%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+
+        .pane-content::-webkit-scrollbar { width: 4px; height: 4px; }
+        .pane-content::-webkit-scrollbar-track { background: transparent; }
+        .pane-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        @media (max-width: 768px) {
+            .row { flex-direction: column; }
+            .stats { margin-left: 0; width: 100%; flex-wrap: wrap; margin-top: 6px; }
+            .graph-controls { flex-wrap: wrap; }
+            .header { position: relative; top: 0; height: auto; padding: 12px 16px; }
+            .timer-display { font-size: 2.8rem; }
+            .header-vitals { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <button class="scroll-top-btn" id="scrollTopBtn" title="Scroll to top">↑</button>
+
+    <!-- Patient Information Modal -->
+    <div class="modal" id="patientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> New Patient Session</h2>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+            <form id="patientForm">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Full Name *</label>
+                    <input type="text" id="patientName" required placeholder="Enter patient full name">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-alt"></i> Age *</label>
+                    <input type="number" id="patientAge" required placeholder="Age in years" min="0" max="120">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-venus-mars"></i> Gender *</label>
+                    <select id="patientGender" required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Phone Number</label>
+                    <input type="tel" id="patientPhone" placeholder="Contact number (optional)">
+                </div>
+                <div class="form-group">
+                    <label><i fa-fas fa-notes-medical"></i> Notes</label>
+                    <input type="text" id="patientNotes" placeholder="Medical notes / conditions (optional)">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="cancelModalBtn">Cancel</button>
+                    <button type="submit" class="btn btn-success">Start Session & Calibrate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="brand-mark">
+                    <i class="fas fa-lungs"></i>
+                </div>
+                <div class="title">
+                    <h1>Respiration Intelligence System</h1>
+                    <p>AI-Powered Respiratory Monitoring &nbsp;|&nbsp; Real-time Chest Displacement (cm)</p>
+                </div>
+                <div class="header-divider"></div>
+                <div class="patient-info-badge" id="patientInfoBadge">
+                    <i class="fas fa-user"></i> No active session
+                </div>
+                <div class="header-vitals">
+                    <div class="vital-chip">
+                        <span class="vital-chip-label">Disp cm</span>
+                        <span class="vital-chip-value teal" id="currentDispHeader">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" id="calibrateBtn">
+                    <i class="fas fa-crosshairs"></i> Calibrate
+                </button>
+                <button class="btn btn-success" id="startBtn">
+                    <i class="fas fa-play"></i> Start
+                </button>
+                <button class="btn btn-danger" id="stopBtn">
+                    <i class="fas fa-stop"></i> Stop
+                </button>
+                <button class="btn btn-warning" id="saveDataBtn">
+                    <i class="fas fa-save"></i> Save Session
+                </button>
+                <div class="status-badge" id="statusBadge">
+                    <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+                    Disconnected
+                </div>
+            </div>
+        </div>
+
+        <!-- Panels -->
+        <div class="split-container" id="splitContainer">
+
+            <!-- TOP ROW -->
+            <div class="row" id="topRow">
+                <div class="pane" id="pane1">
+                    <div class="pane-header">
+                        <div class="pane-header-icon"><i class="fas fa-wind"></i></div>
+                        Respiratory Motion Visualizer
+                    </div>
+                    <div class="pane-content">
+                        <div class="cylinder-container">
+                            <div class="lung-viz-wrap">
+                                <div class="lung-glow-ring"></div>
+                                <div class="cylinder">
+                                    <div class="cylinder-ticks">
+                                        <div class="cylinder-tick"></div><div class="cylinder-tick"></div>
+                                        <div class="cylinder-tick"></div><div class="cylinder-tick"></div>
+                                        <div class="cylinder-tick"></div><div class="cylinder-tick"></div>
+                                        <div class="cylinder-tick"></div><div class="cylinder-tick"></div>
+                                        <div class="cylinder-tick"></div><div class="cylinder-tick"></div>
+                                        <div class="cylinder-tick"></div>
+                                    </div>
+                                    <div class="moving-ring" id="movingRing"></div>
+                                </div>
+                                <div class="cylinder-cap-top"></div>
+                                <div class="cylinder-cap-bottom"></div>
+                                <div class="cylinder-scale">
+                                    <span class="scale-label">+5</span>
+                                    <span class="scale-label">+3</span>
+                                    <span class="scale-label"> 0</span>
+                                    <span class="scale-label">-3</span>
+                                    <span class="scale-label">-5</span>
+                                </div>
+                            </div>
+                            <div class="phase-readout">
+                                <div class="phase-text phase-pause" id="phaseText">STANDBY</div>
+                                <div class="phase-legend">
+                                    <div class="phase-legend-item"><div class="phase-legend-dot" style="background:var(--green);"></div>INHALE ↑</div>
+                                    <div class="phase-legend-item"><div class="phase-legend-dot" style="background:var(--red);"></div>EXHALE ↓</div>
+                                    <div class="phase-legend-item"><div class="phase-legend-dot" style="background:var(--amber);"></div>PAUSE</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pane" id="pane2">
+                    <div class="pane-header">
+                        <div class="live-indicator"></div>
+                        Real-time Breathing Waveform
+                    </div>
+                    <div class="pane-content" style="display: flex; flex-direction: column;">
+                        <div class="graph-controls">
+                            <div class="graph-controls-group">
+                                <button class="time-btn" data-seconds="5">5s</button>
+                                <button class="time-btn active" data-seconds="10">10s</button>
+                                <button class="time-btn" data-seconds="15">15s</button>
+                                <button class="time-btn" data-seconds="20">20s</button>
+                                <button class="time-btn" data-seconds="30">30s</button>
+                                <button class="time-btn" data-seconds="60">60s</button>
+                            </div>
+                            <div class="ctrl-divider"></div>
+                            <div class="graph-controls-group">
+                                <button class="zoom-btn" id="zoomInBtn"><i class="fas fa-search-plus"></i></button>
+                                <button class="zoom-btn" id="zoomOutBtn"><i class="fas fa-search-minus"></i></button>
+                                <button class="zoom-btn" id="resetZoomBtn">⟳</button>
+                            </div>
+                            <div class="ctrl-divider"></div>
+                            <div class="scroll-controls">
+                                <span class="scroll-controls-label">SCROLL</span>
+                                <button class="scroll-btn" id="scrollAutoBtn" data-mode="auto">Auto</button>
+                                <button class="scroll-btn" id="scrollManualBtn" data-mode="manual">Manual</button>
+                            </div>
+                            <div class="stats">
+                                <span class="stat-item">Cur: <span id="currentDisp">0</span> cm</span>
+                                <span class="stat-item">Zero: <span id="zeroValue">--</span> cm</span>
+                            </div>
+                        </div>
+                        <canvas id="breathingGraph" style="flex:1;min-height:280px;"></canvas>
+                        <div class="graph-tip">⌨ Wheel: zoom &nbsp;|&nbsp; Drag: pan &nbsp;|&nbsp; Double-click: reset</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTTOM ROW -->
+            <div class="row" id="bottomRow">
+                <div class="pane" id="pane3">
+                    <div class="pane-header">
+                        <div class="pane-header-icon"><i class="fas fa-bolt"></i></div>
+                        Relay Control System
+                    </div>
+                    <div class="pane-content">
+                        <div class="relay-panel">
+                            <div>
+                                <div class="relay-section-label">Trigger On Breath Phase</div>
+                                <div class="relay-phase-group">
+                                    <div class="relay-phase-option">
+                                        <input type="radio" name="breathPhase" id="phaseInhale" value="inhale" checked>
+                                        <label for="phaseInhale"><i class="fas fa-arrow-up"></i> Inhale</label>
+                                    </div>
+                                    <div class="relay-phase-option">
+                                        <input type="radio" name="breathPhase" id="phaseExhale" value="exhale">
+                                        <label for="phaseExhale"><i class="fas fa-arrow-down"></i> Exhale</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relay-btn-wrap">
+                                <button class="relay-toggle-btn off" id="relayToggleBtn">
+                                    <span class="relay-dot off" id="relayDot"></span>
+                                    <span id="relayBtnLabel">RELAY OFF</span>
+                                </button>
+                            </div>
+                            <div>
+                                <div class="relay-section-label">Operation Mode</div>
+                                <div class="relay-mode-group">
+                                    <button class="relay-mode-btn active" id="relayAutoBtn">Auto</button>
+                                    <button class="relay-mode-btn" id="relayManualBtn">Manual</button>
+                                </div>
+                            </div>
+                            <div class="relay-status-bar" id="relayStatusBar">
+                                <span class="relay-status-icon">ℹ️</span>
+                                <span id="relayStatusText">Auto mode — relay triggers when breath hold ≥ 5 s is detected.</span>
+                            </div>
+                            <div class="data-log-section" id="dataLogSection">
+                                <div class="data-log-header">
+                                    <span><i class="fas fa-history"></i> Saved Sessions</span>
+                                    <button class="btn" style="padding:2px 8px; font-size:0.55rem;" id="refreshLogsBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                                </div>
+                                <div class="data-log-list" id="dataLogList">
+                                    <div style="color:var(--text-muted); text-align:center; padding:12px;">No saved sessions yet</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pane" id="pane4">
+                    <div class="pane-header">
+                        <div class="pane-header-icon"><i class="fas fa-stopwatch"></i></div>
+                        Breath-Hold Timer
+                    </div>
+                    <div class="pane-content">
+                        <div class="timer-pane">
+                            <div class="timer-label">Relay Active Duration</div>
+                            <div class="timer-ring-wrap">
+                                <svg class="timer-ring-svg" viewBox="0 0 160 160">
+                                    <circle class="timer-ring-bg" cx="80" cy="80" r="70"/>
+                                    <circle class="timer-ring-fill" id="timerRingFill" cx="80" cy="80" r="70"/>
+                                </svg>
+                                <div class="timer-display idle" id="timerDisplay">00:00.0</div>
+                            </div>
+                            <div class="timer-state-badge idle" id="timerBadge">IDLE</div>
+                            <div class="hold-progress-wrap" id="holdProgressWrap" style="display:none;">
+                                <div class="hold-progress-label">
+                                    <span>Detecting hold…</span>
+                                    <span id="holdProgressSec">0 / 5 s</span>
+                                </div>
+                                <div class="hold-progress-track">
+                                    <div class="hold-progress-fill" id="holdProgressFill"></div>
+                                </div>
+                            </div>
+                            <div class="timer-sub" id="timerSub">
+                                Waiting for relay to activate.<br>
+                                Calibrate zero to reset timer.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ─────────────────────────────────────────────────────────
+           SOCKET + GLOBAL STATE
+        ───────────────────────────────────────────────────────── */
+        const socket = io();
+
+        let timeWindowSeconds = 10;
+        let timeData = [];
+        let displacementData = [];
+        let monitoringActive = false;
+        let startTimestamp = null;
+        let scrollMode = 'auto';
+
+        let relayMode   = 'auto';
+        let relayOn     = false;
+        let selectedPhase = 'inhale';
+
+        let timerRunning     = false;
+        let timerStartMs     = null;
+        let timerFrozenValue = null;
+        let timerRAF         = null;
+
+        const HOLD_THRESHOLD_SEC = 5;
+        let holdStartTime = null;
+        let holdPhaseActive = false;
+
+        // Session data for current patient
+        let currentSession = {
+            sessionId: null,
+            patientInfo: null,
+            startTime: null,
+            dataPoints: [],
+            zeroValue: null
+        };
+        let sessionActive = false;
+
+        // ─────────────────────────────────────────────────────────
+        // PATIENT MODAL HANDLERS
+        // ─────────────────────────────────────────────────────────
+        const patientModal = document.getElementById('patientModal');
+        const patientForm = document.getElementById('patientForm');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const calibrateBtn = document.getElementById('calibrateBtn');
+        const saveDataBtn = document.getElementById('saveDataBtn');
+        const refreshLogsBtn = document.getElementById('refreshLogsBtn');
+
+        function showPatientModal() {
+            patientForm.reset();
+            patientModal.classList.add('active');
+        }
+
+        function hidePatientModal() {
+            patientModal.classList.remove('active');
+        }
+
+        async function startNewSession(patientData) {
+            const response = await fetch('/api/session/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(patientData)
+            });
+            const result = await response.json();
+            if (result.success) {
+                currentSession = {
+                    sessionId: result.sessionId,
+                    patientInfo: result.patientInfo,
+                    startTime: new Date(),
+                    dataPoints: [],
+                    zeroValue: null
+                };
+                sessionActive = true;
+                
+                // Update UI
+                document.getElementById('patientInfoBadge').innerHTML = 
+                    `<i class="fas fa-user"></i> ${result.patientInfo.name} (${result.patientInfo.age}y)`;
+                showNotification(`New session started for ${result.patientInfo.name}`, 'success');
+                
+                // Now trigger calibration
+                socket.emit('calibrate');
+                return true;
+            }
+            return false;
+        }
+
+        async function saveCurrentSession() {
+            if (!sessionActive || currentSession.dataPoints.length === 0) {
+                showNotification('No active session or no data to save', 'warning');
+                return;
+            }
+            
+            const response = await fetch('/api/session/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId: currentSession.sessionId,
+                    dataPoints: currentSession.dataPoints,
+                    zeroValue: currentSession.zeroValue,
+                    duration: (Date.now() - currentSession.startTime) / 1000
+                })
+            });
+            const result = await response.json();
+            if (result.success) {
+                showNotification(`Session saved to ${result.filename}`, 'success');
+                loadSavedSessions();
+            } else {
+                showNotification('Failed to save session', 'error');
+            }
+        }
+
+        async function loadSavedSessions() {
+            const response = await fetch('/api/sessions/list');
+            const sessions = await response.json();
+            const logList = document.getElementById('dataLogList');
+            
+            if (sessions.length === 0) {
+                logList.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:12px;">No saved sessions yet</div>';
+                return;
+            }
+            
+            logList.innerHTML = sessions.map(s => `
+                <div class="data-log-item" onclick="viewSession('${s.filename}')">
+                    <span><i class="fas fa-user"></i> ${s.patient.name} (${s.patient.age}y)</span>
+                    <span class="log-date">${new Date(s.date).toLocaleString()}</span>
+                </div>
+            `).join('');
+        }
+
+        window.viewSession = async function(filename) {
+            const response = await fetch(`/api/session/view/${filename}`);
+            const data = await response.json();
+            if (data.success) {
+                showNotification(`Loading session: ${data.session.patient.name}`, 'info');
+                // Load the session data into the graph
+                if (data.session.data && data.session.data.length > 0) {
+                    timeData = data.session.data.map(d => d.time);
+                    displacementData = data.session.data.map(d => d.displacement);
+                    if (startTimestamp) {
+                        // Adjust timestamp offset
+                        const offset = startTimestamp - (timeData[0] * 1000);
+                        timeData = timeData.map(t => t + (Date.now() - offset) / 1000);
+                    }
+                    updateGraph();
+                    showNotification(`Loaded ${data.session.data.length} data points`, 'success');
+                }
+            }
+        };
+
+        patientForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const patientData = {
+                name: document.getElementById('patientName').value,
+                age: parseInt(document.getElementById('patientAge').value),
+                gender: document.getElementById('patientGender').value,
+                phone: document.getElementById('patientPhone').value,
+                notes: document.getElementById('patientNotes').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            if (!patientData.name || !patientData.age || !patientData.gender) {
+                showNotification('Please fill all required fields', 'warning');
+                return;
+            }
+            
+            hidePatientModal();
+            await startNewSession(patientData);
+        });
+
+        modalCloseBtn.addEventListener('click', hidePatientModal);
+        cancelModalBtn.addEventListener('click', hidePatientModal);
+
+        // Override calibrate button to show patient modal first
+        calibrateBtn.onclick = () => {
+            if (sessionActive) {
+                // If session active, confirm new session
+                if (confirm('Starting a new session will save the current data. Continue?')) {
+                    saveCurrentSession();
+                    showPatientModal();
+                }
+            } else {
+                showPatientModal();
+            }
+        };
+
+        saveDataBtn.onclick = () => saveCurrentSession();
+        refreshLogsBtn.onclick = () => loadSavedSessions();
+
+        /* ─────────────────────────────────────────────────────────
+           SCROLL-TO-TOP
+        ───────────────────────────────────────────────────────── */
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        window.addEventListener('scroll', () => {
+            scrollTopBtn.classList.toggle('visible', window.scrollY > 300);
+        });
+        scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+        /* ─────────────────────────────────────────────────────────
+           CHART.JS
+        ───────────────────────────────────────────────────────── */
+        Chart.register(ChartZoom);
+        const ctx = document.getElementById('breathingGraph').getContext('2d');
+        const breathingChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'Chest Displacement (cm)',
+                    data: [],
+                    borderColor: '#00d4c8',
+                    backgroundColor: 'rgba(0,212,200,0.08)',
+                    borderWidth: 2,
+                    fill: true, tension: 0.15,
+                    pointRadius: 0, pointHoverRadius: 4,
+                    spanGaps: true
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: true, animation: false,
+                interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                scales: {
+                    y: {
+                        title: { display: true, text: 'Displacement (cm)', color: '#4a6080', font: { family: 'JetBrains Mono', size: 10 } },
+                        grid: { color: 'rgba(0,212,200,0.05)' },
+                        ticks: { color: '#4a6080', stepSize: 1, precision: 0, font: { family: 'JetBrains Mono', size: 10 },
+                            callback: v => v.toFixed(0) + ' cm'
+                        },
+                        min: -5, max: 5
+                    },
+                    x: {
+                        title: { display: true, text: 'Time (seconds)', color: '#4a6080', font: { family: 'JetBrains Mono', size: 10 } },
+                        grid: { color: 'rgba(0,212,200,0.05)' },
+                        ticks: { color: '#4a6080', font: { family: 'JetBrains Mono', size: 10 }, callback: v => v.toFixed(0) + 's' },
+                        type: 'linear', position: 'bottom', min: 0, max: timeWindowSeconds
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#8faac8', font: { family: 'JetBrains Mono', size: 10 } } },
+                    tooltip: {
+                        enabled: true, mode: 'index', intersect: false,
+                        backgroundColor: 'rgba(6,14,26,0.95)',
+                        borderColor: 'rgba(0,212,200,0.3)',
+                        borderWidth: 1,
+                        titleColor: '#8faac8',
+                        bodyColor: '#00d4c8',
+                        titleFont: { family: 'JetBrains Mono', size: 10 },
+                        bodyFont: { family: 'JetBrains Mono', size: 10 },
+                        callbacks: {
+                            label: c => `Displacement: ${c.parsed.y.toFixed(0)} cm`,
+                            title: c => `Time: ${c[0].parsed.x.toFixed(1)} s`
+                        }
+                    },
+                    zoom: {
+                        pan: {
+                            enabled: true, mode: 'x', speed: 10, threshold: 5,
+                            onPan() { if (scrollMode === 'auto') { scrollMode='manual'; updateScrollButtons(); showNotification('Manual mode activated. Click Auto to resume.','info'); } }
+                        },
+                        zoom: {
+                            wheel: { enabled: true, speed: 0.05 },
+                            pinch: { enabled: true },
+                            mode: 'x',
+                            onZoom() { if (scrollMode === 'auto') { scrollMode='manual'; updateScrollButtons(); showNotification('Manual zoom mode. Click Auto to resume.','info'); } },
+                            onZoomComplete() { breathingChart.update('none'); }
+                        },
+                        limits: { x: { min: 0, max: 300 }, y: { min: -10, max: 10 } }
+                    }
+                }
+            }
+        });
+
+        /* ─────────────────────────────────────────────────────────
+           GRAPH HELPERS
+        ───────────────────────────────────────────────────────── */
+        function zoomIn() {
+            const mn = breathingChart.options.scales.x.min;
+            const mx = breathingChart.options.scales.x.max;
+            const c = (mn + mx) / 2; const r = (mx - mn) * 0.7;
+            breathingChart.options.scales.x.min = Math.max(0, c - r/2);
+            breathingChart.options.scales.x.max = c + r/2;
+            breathingChart.update('none');
+            if (scrollMode === 'auto') { scrollMode='manual'; updateScrollButtons(); showNotification('Manual zoom mode. Click Auto to resume.','info'); }
+        }
+        function zoomOut() {
+            const mn = breathingChart.options.scales.x.min;
+            const mx = breathingChart.options.scales.x.max;
+            const c = (mn + mx) / 2; const r = (mx - mn) * 1.5;
+            breathingChart.options.scales.x.min = Math.max(0, c - r/2);
+            breathingChart.options.scales.x.max = c + r/2;
+            breathingChart.update('none');
+            if (scrollMode === 'auto') { scrollMode='manual'; updateScrollButtons(); showNotification('Manual zoom mode. Click Auto to resume.','info'); }
+        }
+        function resetZoom() {
+            if (monitoringActive && startTimestamp) {
+                const ct = (Date.now() - startTimestamp) / 1000;
+                breathingChart.options.scales.x.min = Math.max(0, ct - timeWindowSeconds);
+                breathingChart.options.scales.x.max = ct;
+            } else {
+                breathingChart.options.scales.x.min = 0;
+                breathingChart.options.scales.x.max = timeWindowSeconds;
+            }
+            breathingChart.options.scales.y.min = -5;
+            breathingChart.options.scales.y.max = 5;
+            breathingChart.update('none');
+        }
+        function updateGraph() {
+            if (!monitoringActive) return;
+            if (timeData.length === 0) { breathingChart.data.datasets[0].data = []; breathingChart.update('none'); return; }
+            const ct = (Date.now() - startTimestamp) / 1000;
+            const ws = ct - timeWindowSeconds;
+            const pts = [];
+            for (let i = 0; i < timeData.length; i++) {
+                if (timeData[i] >= ws) pts.push({ x: timeData[i], y: displacementData[i] });
+            }
+            breathingChart.data.datasets[0].data = pts;
+            if (scrollMode === 'auto' && pts.length > 0) {
+                breathingChart.options.scales.x.min = Math.max(0, ct - timeWindowSeconds);
+                breathingChart.options.scales.x.max = ct;
+            }
+            if (pts.length > 5) {
+                const ry = pts.slice(-30).map(p => p.y);
+                const my = Math.max(...ry, 1); const miy = Math.min(...ry, -1);
+                const pd = Math.max(0.5, (my - miy) * 0.2);
+                breathingChart.options.scales.y.min = miy - pd;
+                breathingChart.options.scales.y.max = my + pd;
+            } else {
+                breathingChart.options.scales.y.min = -3; breathingChart.options.scales.y.max = 3;
+            }
+            breathingChart.update('none');
+            if (displacementData.length > 0) {
+                const val = displacementData[displacementData.length - 1];
+                document.getElementById('currentDisp').innerHTML = val;
+                document.getElementById('currentDispHeader').innerHTML = val;
+            }
+        }
+        function updateScrollButtons() {
+            document.getElementById('scrollAutoBtn').classList.toggle('active', scrollMode === 'auto');
+            document.getElementById('scrollManualBtn').classList.toggle('active', scrollMode !== 'auto');
+        }
+        function resetToAutoScroll() {
+            scrollMode = 'auto'; updateScrollButtons(); resetZoom();
+            showNotification('Auto-scroll enabled — graph following latest data.', 'success');
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           RING POSITION (visualizer)
+        ───────────────────────────────────────────────────────── */
+        const movingRing = document.getElementById('movingRing');
+        function updateRingPosition(displacement) {
+            const maxD = 3, minTop = 50, maxTop = 250;
+            const clamped = Math.max(-maxD, Math.min(maxD, displacement));
+            const norm = (clamped + maxD) / (2 * maxD);
+            const topPos = maxTop - (norm * (maxTop - minTop));
+            movingRing.style.top = `${topPos}px`;
+            const phaseText = document.getElementById('phaseText');
+            if (displacement >= 1)       { phaseText.innerHTML = 'INHALING ↑'; phaseText.className = 'phase-text phase-inhale'; }
+            else if (displacement <= -1) { phaseText.innerHTML = 'EXHALING ↓'; phaseText.className = 'phase-text phase-exhale'; }
+            else                         { phaseText.innerHTML = 'PAUSE ●';     phaseText.className = 'phase-text phase-pause'; }
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           RELAY HELPERS
+        ───────────────────────────────────────────────────────── */
+        function setRelay(on) {
+            relayOn = on;
+            const btn  = document.getElementById('relayToggleBtn');
+            const dot  = document.getElementById('relayDot');
+            const lbl  = document.getElementById('relayBtnLabel');
+            if (on) {
+                btn.className = 'relay-toggle-btn on';
+                dot.className = 'relay-dot on';
+                lbl.textContent = 'RELAY ON';
+            } else {
+                btn.className = 'relay-toggle-btn off';
+                dot.className = 'relay-dot off';
+                lbl.textContent = 'RELAY OFF';
+            }
+        }
+
+        function updateRelayStatus(msg) {
+            document.getElementById('relayStatusText').textContent = msg;
+        }
+
+        document.getElementById('relayToggleBtn').addEventListener('click', () => {
+            if (relayMode !== 'manual') return;
+            if (relayOn) {
+                socket.emit('relay_control', { state: false });
+                stopTimer();
+                updateRelayStatus('Manual — relay off. Press button to activate.');
+            } else {
+                socket.emit('relay_control', { state: true });
+                startTimer();
+                updateRelayStatus('Manual — relay ON. Timer running. Press button to stop.');
+            }
+        });
+
+        document.getElementById('relayAutoBtn').addEventListener('click', () => {
+            relayMode = 'auto';
+            document.getElementById('relayAutoBtn').classList.add('active');
+            document.getElementById('relayManualBtn').classList.remove('active');
+            socket.emit('relay_set_mode', { mode: 'auto' });
+            if (relayOn) { setRelay(false); stopTimer(); }
+            holdStartTime = null; holdPhaseActive = false;
+            document.getElementById('holdProgressWrap').style.display = 'none';
+            updateRelayStatus('Auto mode — relay triggers when breath hold ≥ 5 s is detected.');
+        });
+        document.getElementById('relayManualBtn').addEventListener('click', () => {
+            relayMode = 'manual';
+            document.getElementById('relayManualBtn').classList.add('active');
+            document.getElementById('relayAutoBtn').classList.remove('active');
+            socket.emit('relay_set_mode', { mode: 'manual' });
+            if (relayOn) { setRelay(false); stopTimer(); }
+            holdStartTime = null; holdPhaseActive = false;
+            document.getElementById('holdProgressWrap').style.display = 'none';
+            updateRelayStatus('Manual mode — press the relay button to toggle.');
+        });
+
+        document.querySelectorAll('input[name="breathPhase"]').forEach(r => {
+            r.addEventListener('change', () => {
+                selectedPhase = r.value;
+                holdStartTime = null; holdPhaseActive = false;
+                if (relayOn && relayMode === 'auto') {
+                    setRelay(false); stopTimer();
+                    updateRelayStatus(`Auto mode — now monitoring for ${selectedPhase} hold ≥ 5 s.`);
+                }
+            });
+        });
+
+        /* ─────────────────────────────────────────────────────────
+           TIMER HELPERS
+        ───────────────────────────────────────────────────────── */
+        function fmtTime(ms) {
+            const total = ms / 1000;
+            const m = Math.floor(total / 60);
+            const s = Math.floor(total % 60);
+            const d = Math.floor((total % 1) * 10);
+            return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${d}`;
+        }
+
+        function startTimer() {
+            timerFrozenValue = null;
+            timerStartMs = Date.now();
+            timerRunning = true;
+            socket.emit('relay_timer_state', { active: true });
+            const el  = document.getElementById('timerDisplay');
+            const bdg = document.getElementById('timerBadge');
+            const sub = document.getElementById('timerSub');
+            const ring = document.getElementById('timerRingFill');
+            el.className  = 'timer-display running';
+            bdg.className = 'timer-state-badge running';
+            bdg.textContent = 'RUNNING';
+            ring.className = 'timer-ring-fill running';
+            sub.textContent = 'Relay is active. Timer counts relay-on duration.';
+            function tick() {
+                if (!timerRunning) return;
+                el.textContent = fmtTime(Date.now() - timerStartMs);
+                timerRAF = requestAnimationFrame(tick);
+            }
+            cancelAnimationFrame(timerRAF);
+            timerRAF = requestAnimationFrame(tick);
+        }
+
+        function stopTimer() {
+            timerRunning = false;
+            cancelAnimationFrame(timerRAF);
+            socket.emit('relay_timer_state', { active: false });
+            const el  = document.getElementById('timerDisplay');
+            const bdg = document.getElementById('timerBadge');
+            const sub = document.getElementById('timerSub');
+            const ring = document.getElementById('timerRingFill');
+            if (timerStartMs) { timerFrozenValue = Date.now() - timerStartMs; el.textContent = fmtTime(timerFrozenValue); }
+            el.className  = timerFrozenValue ? 'timer-display stopped' : 'timer-display idle';
+            bdg.className = timerFrozenValue ? 'timer-state-badge stopped' : 'timer-state-badge idle';
+            bdg.textContent = timerFrozenValue ? 'STOPPED' : 'IDLE';
+            ring.className = timerFrozenValue ? 'timer-ring-fill stopped' : 'timer-ring-fill';
+            sub.textContent = timerFrozenValue
+                ? 'Showing last relay-on duration. Calibrate zero to reset.'
+                : 'Waiting for relay to activate. Calibrate zero to reset timer.';
+        }
+
+        function resetTimer() {
+            timerRunning = false; timerStartMs = null; timerFrozenValue = null;
+            cancelAnimationFrame(timerRAF);
+            socket.emit('relay_timer_state', { active: false });
+            const el  = document.getElementById('timerDisplay');
+            const bdg = document.getElementById('timerBadge');
+            const sub = document.getElementById('timerSub');
+            const ring = document.getElementById('timerRingFill');
+            el.textContent = '00:00.0';
+            el.className  = 'timer-display idle';
+            bdg.className = 'timer-state-badge idle';
+            bdg.textContent = 'IDLE';
+            ring.className = 'timer-ring-fill';
+            ring.style.strokeDashoffset = '440';
+            sub.textContent = 'Waiting for relay to activate. Calibrate zero to reset timer.';
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           AUTO HOLD DETECTION
+        ───────────────────────────────────────────────────────── */
+        function processAutoHold(displacement) {
+            if (relayMode !== 'auto') return;
+            const phase = displacement >= 1 ? 'inhale' : displacement <= -1 ? 'exhale' : 'pause';
+            const inTargetPhase = (phase === selectedPhase);
+            if (!relayOn) {
+                if (inTargetPhase) {
+                    if (!holdPhaseActive) { holdPhaseActive = true; holdStartTime = Date.now(); }
+                    const elapsed = (Date.now() - holdStartTime) / 1000;
+                    const pct = Math.min(100, (elapsed / HOLD_THRESHOLD_SEC) * 100);
+                    document.getElementById('holdProgressWrap').style.display = 'block';
+                    document.getElementById('holdProgressFill').style.width = pct + '%';
+                    document.getElementById('holdProgressSec').textContent = `${elapsed.toFixed(1)} / ${HOLD_THRESHOLD_SEC} s`;
+                    if (elapsed >= HOLD_THRESHOLD_SEC) {
+                        setRelay(true);
+                        startTimer();
+                        document.getElementById('holdProgressWrap').style.display = 'none';
+                        updateRelayStatus(`Auto — ${selectedPhase} hold detected (${HOLD_THRESHOLD_SEC}s). Relay ON, timer running.`);
+                        showNotification(`Relay triggered: ${selectedPhase} hold detected`, 'success');
+                    } else {
+                        updateRelayStatus(`Auto — detecting ${selectedPhase} hold… ${elapsed.toFixed(1)} / ${HOLD_THRESHOLD_SEC} s`);
+                    }
+                } else {
+                    if (holdPhaseActive) {
+                        holdPhaseActive = false; holdStartTime = null;
+                        document.getElementById('holdProgressWrap').style.display = 'none';
+                        document.getElementById('holdProgressFill').style.width = '0%';
+                        updateRelayStatus(`Auto mode — monitoring for ${selectedPhase} hold ≥ ${HOLD_THRESHOLD_SEC} s.`);
+                    }
+                }
+            } else {
+                if (!inTargetPhase && phase !== 'pause') {
+                    setRelay(false); stopTimer();
+                    holdPhaseActive = false; holdStartTime = null;
+                    document.getElementById('holdProgressWrap').style.display = 'none';
+                    updateRelayStatus('Auto — breathing pattern changed. Relay OFF.');
+                    showNotification('Relay off: breathing resumed.', 'info');
+                }
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           SOCKET EVENTS
+        ───────────────────────────────────────────────────────── */
+        socket.on('connect', () => {
+            const badge = document.getElementById('statusBadge');
+            badge.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span> Connected';
+            badge.classList.add('connected');
+            loadSavedSessions();
+        });
+        socket.on('disconnect', () => {
+            const badge = document.getElementById('statusBadge');
+            badge.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span> Disconnected';
+            badge.classList.remove('connected');
+        });
+        socket.on('calibration_status', (data) => {
+            if (data.calibrated) {
+                showNotification('Calibration complete — zero point set.', 'success');
+                if (sessionActive && data.zero_value !== undefined) {
+                    currentSession.zeroValue = data.zero_value;
+                }
+                if (relayOn) { setRelay(false); }
+                resetTimer();
+                holdPhaseActive = false; holdStartTime = null;
+                document.getElementById('holdProgressWrap').style.display = 'none';
+                document.getElementById('holdProgressFill').style.width = '0%';
+            } else {
+                showNotification('Please calibrate — have patient lie still then click Calibrate.', 'warning');
+            }
+        });
+        socket.on('calibration_complete', (data) => {
+            if (data && data.zero_value !== undefined) {
+                document.getElementById('zeroValue').innerHTML = data.zero_value;
+                if (sessionActive) currentSession.zeroValue = data.zero_value;
+            }
+            showNotification(data.message || 'Calibration complete.', 'success');
+            resetTimer();
+        });
+        socket.on('sensor_data', (data) => {
+            const displacement = data.displacement;
+            if (monitoringActive && startTimestamp) {
+                const ct = (Date.now() - startTimestamp) / 1000;
+                timeData.push(ct);
+                displacementData.push(displacement);
+                
+                // Store data point in current session
+                if (sessionActive) {
+                    currentSession.dataPoints.push({
+                        time: ct,
+                        displacement: displacement,
+                        phase: data.phase,
+                        timestamp: Date.now()
+                    });
+                }
+                
+                const maxAge = 300;
+                while (timeData.length > 0 && timeData[0] < ct - maxAge) { timeData.shift(); displacementData.shift(); }
+                updateGraph();
+            }
+            updateRingPosition(displacement);
+            processAutoHold(displacement);
+        });
+
+        socket.on('relay_status_update', (data) => {
+            if (data.mode === 'auto') {
+                document.getElementById('relayAutoBtn').classList.add('active');
+                document.getElementById('relayManualBtn').classList.remove('active');
+            } else {
+                document.getElementById('relayManualBtn').classList.add('active');
+                document.getElementById('relayAutoBtn').classList.remove('active');
+            }
+            const btn = document.getElementById('relayToggleBtn');
+            const dot = document.getElementById('relayDot');
+            const lbl = document.getElementById('relayBtnLabel');
+            if (data.state) {
+                btn.className = 'relay-toggle-btn on';
+                dot.className = 'relay-dot on';
+                lbl.textContent = 'RELAY ON';
+            } else {
+                btn.className = 'relay-toggle-btn off';
+                dot.className = 'relay-dot off';
+                lbl.textContent = 'RELAY OFF';
+            }
+            relayOn = data.state;
+            relayMode = data.mode;
+            if (data.mode === 'auto') {
+                if (data.timer_active) { updateRelayStatus('Auto mode — Timer active, relay ON'); }
+                else { updateRelayStatus('Auto mode — Waiting for breath hold detection'); }
+            } else {
+                updateRelayStatus('Manual mode — Use button to control relay');
+            }
+        });
+
+        /* ─────────────────────────────────────────────────────────
+           HEADER BUTTON HANDLERS
+        ───────────────────────────────────────────────────────── */
+        document.getElementById('startBtn').onclick = () => {
+            monitoringActive = true; startTimestamp = Date.now();
+            timeData = []; displacementData = [];
+            breathingChart.data.datasets[0].data = [];
+            scrollMode = 'auto'; updateScrollButtons();
+            socket.emit('start_streaming');
+            showNotification('Monitoring started — watch the waveform appear.', 'success');
+        };
+        document.getElementById('stopBtn').onclick = () => {
+            monitoringActive = false;
+            socket.emit('stop_streaming');
+            if (relayOn && relayMode === 'auto') { setRelay(false); stopTimer(); }
+            showNotification('Monitoring stopped.', 'info');
+        };
+
+        /* ─────────────────────────────────────────────────────────
+           GRAPH TIME/ZOOM CONTROLS
+        ───────────────────────────────────────────────────────── */
+        document.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                timeWindowSeconds = parseInt(btn.dataset.seconds);
+                if (scrollMode === 'auto') resetZoom();
+                updateGraph();
+            });
+        });
+        document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
+        document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
+        document.getElementById('resetZoomBtn').addEventListener('click', resetZoom);
+        document.getElementById('scrollAutoBtn').addEventListener('click', resetToAutoScroll);
+        document.getElementById('scrollManualBtn').addEventListener('click', () => {
+            scrollMode = 'manual'; updateScrollButtons();
+            showNotification('Manual scroll mode — drag or scroll to navigate.', 'info');
+        });
+
+        /* ─────────────────────────────────────────────────────────
+           SPLIT.JS
+        ───────────────────────────────────────────────────────── */
+        setTimeout(() => {
+            try {
+                Split(['#topRow','#bottomRow'], { direction:'vertical', gutterSize:4, snapOffset:30, cursor:'row-resize', minSize:300 });
+                Split(['#pane1','#pane2'],     { direction:'horizontal', gutterSize:4, snapOffset:30, cursor:'col-resize', minSize:250 });
+                Split(['#pane3','#pane4'],     { direction:'horizontal', gutterSize:4, snapOffset:30, cursor:'col-resize', minSize:250 });
+            } catch(e) { console.log('Split init:', e); }
+        }, 100);
+
+        /* ─────────────────────────────────────────────────────────
+           NOTIFICATION
+        ───────────────────────────────────────────────────────── */
+        function showNotification(message, type) {
+            const n = document.createElement('div');
+            const colors = {
+                success: { bg: 'rgba(0,26,18,0.97)', border: 'rgba(0,230,118,0.5)', color: '#00e676' },
+                error:   { bg: 'rgba(26,0,8,0.97)',  border: 'rgba(255,59,92,0.5)',  color: '#ff3b5c' },
+                info:    { bg: 'rgba(6,14,26,0.97)',  border: 'rgba(0,212,200,0.4)',  color: '#00d4c8' },
+                warning: { bg: 'rgba(26,18,0,0.97)',  border: 'rgba(255,181,71,0.5)', color: '#ffb547' },
+            };
+            const c = colors[type] || colors.info;
+            n.style.cssText = `
+                position:fixed; top:80px; right:20px;
+                padding:10px 16px;
+                border-radius:5px;
+                border:1px solid ${c.border};
+                background:${c.bg};
+                color:${c.color};
+                font-family:'JetBrains Mono',monospace;
+                font-size:0.7rem;
+                letter-spacing:0.04em;
+                z-index:9999;
+                animation:slideIn 0.25s ease;
+                max-width:300px;
+                line-height:1.4;
+                box-shadow:0 4px 20px rgba(0,0,0,0.5);
+            `;
+            n.textContent = message;
+            document.body.appendChild(n);
+            setTimeout(() => { n.style.opacity='0'; n.style.transition='opacity 0.25s'; setTimeout(() => n.remove(), 300); }, 3000);
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           INIT
+        ───────────────────────────────────────────────────────── */
+        movingRing.style.top = '150px';
+
+        function animate() {
+            if (monitoringActive) updateGraph();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.addEventListener('beforeunload', () => {
+            socket.emit('stop_streaming');
+            if (sessionActive && currentSession.dataPoints.length > 0) {
+                // Auto-save on page unload
+                navigator.sendBeacon('/api/session/save', JSON.stringify({
+                    sessionId: currentSession.sessionId,
+                    dataPoints: currentSession.dataPoints,
+                    zeroValue: currentSession.zeroValue
+                }));
+            }
+        });
+        setTimeout(() => resetZoom(), 500);
+    </script>
+</body>
+</html>
