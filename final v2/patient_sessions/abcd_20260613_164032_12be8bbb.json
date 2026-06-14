@@ -1,0 +1,1985 @@
+{
+  "session_id": "12be8bbb",
+  "patient": {
+    "name": "abcd",
+    "age": 20,
+    "gender": "Male",
+    "phone": "",
+    "notes": "",
+    "timestamp": "2026-06-13T11:09:59.678Z"
+  },
+  "start_time": "2026-06-13T16:39:59.701090",
+  "data": [
+    {
+      "time": 0.048,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349002783
+    },
+    {
+      "time": 0.178,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349002913
+    },
+    {
+      "time": 0.245,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349002980
+    },
+    {
+      "time": 0.277,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003012
+    },
+    {
+      "time": 0.356,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003091
+    },
+    {
+      "time": 0.445,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003180
+    },
+    {
+      "time": 0.539,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003274
+    },
+    {
+      "time": 0.638,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003373
+    },
+    {
+      "time": 0.709,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003444
+    },
+    {
+      "time": 0.78,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003515
+    },
+    {
+      "time": 0.883,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003618
+    },
+    {
+      "time": 0.954,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003689
+    },
+    {
+      "time": 1.012,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003747
+    },
+    {
+      "time": 1.111,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003846
+    },
+    {
+      "time": 1.212,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349003947
+    },
+    {
+      "time": 1.274,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349004009
+    },
+    {
+      "time": 1.4,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349004135
+    },
+    {
+      "time": 1.48,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349004215
+    },
+    {
+      "time": 1.533,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349004268
+    },
+    {
+      "time": 1.596,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349004331
+    },
+    {
+      "time": 1.709,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349004444
+    },
+    {
+      "time": 1.813,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349004548
+    },
+    {
+      "time": 1.925,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349004660
+    },
+    {
+      "time": 2.012,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349004747
+    },
+    {
+      "time": 2.065,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349004800
+    },
+    {
+      "time": 2.15,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349004886
+    },
+    {
+      "time": 2.266,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349005001
+    },
+    {
+      "time": 2.37,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349005105
+    },
+    {
+      "time": 2.387,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349005122
+    },
+    {
+      "time": 2.491,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349005226
+    },
+    {
+      "time": 2.59,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349005325
+    },
+    {
+      "time": 2.695,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349005430
+    },
+    {
+      "time": 2.797,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349005532
+    },
+    {
+      "time": 2.885,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349005620
+    },
+    {
+      "time": 2.996,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349005731
+    },
+    {
+      "time": 3.052,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349005787
+    },
+    {
+      "time": 3.125,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349005860
+    },
+    {
+      "time": 3.196,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349005931
+    },
+    {
+      "time": 3.329,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006064
+    },
+    {
+      "time": 3.389,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006124
+    },
+    {
+      "time": 3.463,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006198
+    },
+    {
+      "time": 3.52,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006255
+    },
+    {
+      "time": 3.591,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006326
+    },
+    {
+      "time": 3.661,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006396
+    },
+    {
+      "time": 3.766,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006501
+    },
+    {
+      "time": 3.821,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006556
+    },
+    {
+      "time": 3.872,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006607
+    },
+    {
+      "time": 3.97,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006705
+    },
+    {
+      "time": 4.064,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006799
+    },
+    {
+      "time": 4.176,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349006911
+    },
+    {
+      "time": 4.269,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349007004
+    },
+    {
+      "time": 4.341,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349007076
+    },
+    {
+      "time": 4.433,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349007168
+    },
+    {
+      "time": 4.451,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349007186
+    },
+    {
+      "time": 4.57,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349007305
+    },
+    {
+      "time": 4.623,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349007358
+    },
+    {
+      "time": 4.675,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349007411
+    },
+    {
+      "time": 4.763,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349007498
+    },
+    {
+      "time": 4.812,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349007547
+    },
+    {
+      "time": 4.9,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349007635
+    },
+    {
+      "time": 5.028,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349007763
+    },
+    {
+      "time": 5.078,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349007813
+    },
+    {
+      "time": 5.171,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349007906
+    },
+    {
+      "time": 5.225,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349007960
+    },
+    {
+      "time": 5.282,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349008017
+    },
+    {
+      "time": 5.335,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349008070
+    },
+    {
+      "time": 5.408,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349008143
+    },
+    {
+      "time": 5.513,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349008248
+    },
+    {
+      "time": 5.592,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349008327
+    },
+    {
+      "time": 5.679,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349008414
+    },
+    {
+      "time": 5.733,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349008468
+    },
+    {
+      "time": 5.827,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349008562
+    },
+    {
+      "time": 5.932,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349008667
+    },
+    {
+      "time": 6.026,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349008761
+    },
+    {
+      "time": 6.15,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349008885
+    },
+    {
+      "time": 6.24,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349008975
+    },
+    {
+      "time": 6.274,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349009009
+    },
+    {
+      "time": 6.392,
+      "displacement": 1,
+      "phase": "INHALE",
+      "timestamp": 1781349009127
+    },
+    {
+      "time": 6.458,
+      "displacement": 2,
+      "phase": "INHALE",
+      "timestamp": 1781349009193
+    },
+    {
+      "time": 6.518,
+      "displacement": 2,
+      "phase": "INHALE",
+      "timestamp": 1781349009253
+    },
+    {
+      "time": 6.643,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349009378
+    },
+    {
+      "time": 6.721,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349009456
+    },
+    {
+      "time": 6.802,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349009537
+    },
+    {
+      "time": 6.82,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349009555
+    },
+    {
+      "time": 6.917,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349009652
+    },
+    {
+      "time": 7.027,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349009762
+    },
+    {
+      "time": 7.053,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349009788
+    },
+    {
+      "time": 7.181,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349009916
+    },
+    {
+      "time": 7.217,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349009953
+    },
+    {
+      "time": 7.331,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010066
+    },
+    {
+      "time": 7.386,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010121
+    },
+    {
+      "time": 7.447,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010182
+    },
+    {
+      "time": 7.582,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010317
+    },
+    {
+      "time": 7.6,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010335
+    },
+    {
+      "time": 7.705,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010440
+    },
+    {
+      "time": 7.768,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010503
+    },
+    {
+      "time": 7.83,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010565
+    },
+    {
+      "time": 7.891,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010626
+    },
+    {
+      "time": 7.989,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010724
+    },
+    {
+      "time": 8.093,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010828
+    },
+    {
+      "time": 8.171,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010906
+    },
+    {
+      "time": 8.237,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349010972
+    },
+    {
+      "time": 8.298,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011033
+    },
+    {
+      "time": 8.415,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011150
+    },
+    {
+      "time": 8.437,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011172
+    },
+    {
+      "time": 8.556,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011291
+    },
+    {
+      "time": 8.632,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011367
+    },
+    {
+      "time": 8.704,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011439
+    },
+    {
+      "time": 8.724,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011459
+    },
+    {
+      "time": 8.861,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011596
+    },
+    {
+      "time": 8.88,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011615
+    },
+    {
+      "time": 8.98,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011715
+    },
+    {
+      "time": 9.043,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011778
+    },
+    {
+      "time": 9.118,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011853
+    },
+    {
+      "time": 9.181,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011916
+    },
+    {
+      "time": 9.245,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349011980
+    },
+    {
+      "time": 9.295,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012030
+    },
+    {
+      "time": 9.363,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012098
+    },
+    {
+      "time": 9.486,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012221
+    },
+    {
+      "time": 9.557,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012292
+    },
+    {
+      "time": 9.576,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012311
+    },
+    {
+      "time": 9.692,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012427
+    },
+    {
+      "time": 9.752,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012488
+    },
+    {
+      "time": 9.813,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012548
+    },
+    {
+      "time": 9.928,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012663
+    },
+    {
+      "time": 10.004,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012739
+    },
+    {
+      "time": 10.134,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012869
+    },
+    {
+      "time": 10.206,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349012941
+    },
+    {
+      "time": 10.334,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013069
+    },
+    {
+      "time": 10.447,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013182
+    },
+    {
+      "time": 10.47,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013205
+    },
+    {
+      "time": 10.509,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013244
+    },
+    {
+      "time": 10.594,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013329
+    },
+    {
+      "time": 10.733,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013468
+    },
+    {
+      "time": 10.797,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013532
+    },
+    {
+      "time": 10.854,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013589
+    },
+    {
+      "time": 10.914,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013649
+    },
+    {
+      "time": 10.939,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013674
+    },
+    {
+      "time": 11.085,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013820
+    },
+    {
+      "time": 11.15,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013885
+    },
+    {
+      "time": 11.236,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349013971
+    },
+    {
+      "time": 11.339,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014074
+    },
+    {
+      "time": 11.423,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014158
+    },
+    {
+      "time": 11.499,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014234
+    },
+    {
+      "time": 11.56,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014295
+    },
+    {
+      "time": 11.681,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014416
+    },
+    {
+      "time": 11.734,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014469
+    },
+    {
+      "time": 11.75,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014485
+    },
+    {
+      "time": 11.899,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014634
+    },
+    {
+      "time": 11.921,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014656
+    },
+    {
+      "time": 12.029,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014764
+    },
+    {
+      "time": 12.143,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014878
+    },
+    {
+      "time": 12.221,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349014956
+    },
+    {
+      "time": 12.284,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015019
+    },
+    {
+      "time": 12.369,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015104
+    },
+    {
+      "time": 12.48,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015215
+    },
+    {
+      "time": 12.519,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015254
+    },
+    {
+      "time": 12.613,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015348
+    },
+    {
+      "time": 12.677,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015412
+    },
+    {
+      "time": 12.729,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015464
+    },
+    {
+      "time": 12.81,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015545
+    },
+    {
+      "time": 12.922,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015657
+    },
+    {
+      "time": 13.007,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015742
+    },
+    {
+      "time": 13.118,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015853
+    },
+    {
+      "time": 13.171,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349015906
+    },
+    {
+      "time": 13.266,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349016001
+    },
+    {
+      "time": 13.304,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349016039
+    },
+    {
+      "time": 13.399,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349016134
+    },
+    {
+      "time": 13.529,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349016264
+    },
+    {
+      "time": 13.595,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349016330
+    },
+    {
+      "time": 13.736,
+      "displacement": 3,
+      "phase": "INHALE",
+      "timestamp": 1781349016471
+    },
+    {
+      "time": 13.753,
+      "displacement": 3,
+      "phase": "INHALE",
+      "timestamp": 1781349016488
+    },
+    {
+      "time": 13.876,
+      "displacement": 2,
+      "phase": "INHALE",
+      "timestamp": 1781349016611
+    },
+    {
+      "time": 13.929,
+      "displacement": 2,
+      "phase": "INHALE",
+      "timestamp": 1781349016664
+    },
+    {
+      "time": 13.982,
+      "displacement": 1,
+      "phase": "INHALE",
+      "timestamp": 1781349016717
+    },
+    {
+      "time": 13.997,
+      "displacement": 1,
+      "phase": "INHALE",
+      "timestamp": 1781349016732
+    },
+    {
+      "time": 14.098,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349016833
+    },
+    {
+      "time": 14.15,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349016885
+    },
+    {
+      "time": 14.239,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349016974
+    },
+    {
+      "time": 14.366,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349017101
+    },
+    {
+      "time": 14.421,
+      "displacement": -3,
+      "phase": "EXHALE",
+      "timestamp": 1781349017156
+    },
+    {
+      "time": 14.441,
+      "displacement": -3,
+      "phase": "EXHALE",
+      "timestamp": 1781349017176
+    },
+    {
+      "time": 14.623,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349017358
+    },
+    {
+      "time": 14.712,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349017447
+    },
+    {
+      "time": 14.732,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349017467
+    },
+    {
+      "time": 14.804,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349017539
+    },
+    {
+      "time": 14.887,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349017622
+    },
+    {
+      "time": 14.943,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349017679
+    },
+    {
+      "time": 14.995,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349017730
+    },
+    {
+      "time": 15.052,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349017787
+    },
+    {
+      "time": 15.071,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349017806
+    },
+    {
+      "time": 15.19,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349017925
+    },
+    {
+      "time": 15.247,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349017982
+    },
+    {
+      "time": 15.316,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349018051
+    },
+    {
+      "time": 15.43,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349018165
+    },
+    {
+      "time": 15.468,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349018203
+    },
+    {
+      "time": 15.585,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349018320
+    },
+    {
+      "time": 15.667,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349018402
+    },
+    {
+      "time": 15.762,
+      "displacement": -4,
+      "phase": "EXHALE",
+      "timestamp": 1781349018497
+    },
+    {
+      "time": 15.831,
+      "displacement": -3,
+      "phase": "EXHALE",
+      "timestamp": 1781349018566
+    },
+    {
+      "time": 15.938,
+      "displacement": -3,
+      "phase": "EXHALE",
+      "timestamp": 1781349018673
+    },
+    {
+      "time": 15.987,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349018722
+    },
+    {
+      "time": 16.091,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349018826
+    },
+    {
+      "time": 16.166,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349018901
+    },
+    {
+      "time": 16.285,
+      "displacement": 2,
+      "phase": "INHALE",
+      "timestamp": 1781349019020
+    },
+    {
+      "time": 16.343,
+      "displacement": 3,
+      "phase": "INHALE",
+      "timestamp": 1781349019078
+    },
+    {
+      "time": 16.407,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349019142
+    },
+    {
+      "time": 16.483,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349019218
+    },
+    {
+      "time": 16.605,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349019340
+    },
+    {
+      "time": 16.67,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349019405
+    },
+    {
+      "time": 16.733,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349019468
+    },
+    {
+      "time": 16.814,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349019549
+    },
+    {
+      "time": 16.914,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349019649
+    },
+    {
+      "time": 16.988,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349019723
+    },
+    {
+      "time": 17.105,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349019840
+    },
+    {
+      "time": 17.138,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349019873
+    },
+    {
+      "time": 17.238,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349019973
+    },
+    {
+      "time": 17.29,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020025
+    },
+    {
+      "time": 17.397,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020132
+    },
+    {
+      "time": 17.433,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020168
+    },
+    {
+      "time": 17.562,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020297
+    },
+    {
+      "time": 17.67,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020405
+    },
+    {
+      "time": 17.746,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020481
+    },
+    {
+      "time": 17.842,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020577
+    },
+    {
+      "time": 17.917,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020652
+    },
+    {
+      "time": 17.994,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020729
+    },
+    {
+      "time": 18.064,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020799
+    },
+    {
+      "time": 18.148,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020883
+    },
+    {
+      "time": 18.214,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349020949
+    },
+    {
+      "time": 18.28,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021015
+    },
+    {
+      "time": 18.345,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021080
+    },
+    {
+      "time": 18.433,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021168
+    },
+    {
+      "time": 18.491,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021226
+    },
+    {
+      "time": 18.547,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021282
+    },
+    {
+      "time": 18.606,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021341
+    },
+    {
+      "time": 18.686,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021421
+    },
+    {
+      "time": 18.757,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021492
+    },
+    {
+      "time": 18.866,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021601
+    },
+    {
+      "time": 18.945,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021680
+    },
+    {
+      "time": 19.006,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021741
+    },
+    {
+      "time": 19.073,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021808
+    },
+    {
+      "time": 19.156,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349021891
+    },
+    {
+      "time": 19.269,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022004
+    },
+    {
+      "time": 19.347,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022082
+    },
+    {
+      "time": 19.409,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022144
+    },
+    {
+      "time": 19.517,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022252
+    },
+    {
+      "time": 19.6,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022336
+    },
+    {
+      "time": 19.66,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022395
+    },
+    {
+      "time": 19.767,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022503
+    },
+    {
+      "time": 19.857,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022592
+    },
+    {
+      "time": 19.926,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022661
+    },
+    {
+      "time": 19.961,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022696
+    },
+    {
+      "time": 20.068,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022803
+    },
+    {
+      "time": 20.13,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022865
+    },
+    {
+      "time": 20.208,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349022943
+    },
+    {
+      "time": 20.289,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023024
+    },
+    {
+      "time": 20.399,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023134
+    },
+    {
+      "time": 20.484,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023219
+    },
+    {
+      "time": 20.58,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023315
+    },
+    {
+      "time": 20.712,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023447
+    },
+    {
+      "time": 20.78,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023515
+    },
+    {
+      "time": 20.84,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023575
+    },
+    {
+      "time": 20.926,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023662
+    },
+    {
+      "time": 21.033,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023768
+    },
+    {
+      "time": 21.112,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023847
+    },
+    {
+      "time": 21.185,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023920
+    },
+    {
+      "time": 21.22,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349023955
+    },
+    {
+      "time": 21.34,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024075
+    },
+    {
+      "time": 21.483,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024218
+    },
+    {
+      "time": 21.5,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024235
+    },
+    {
+      "time": 21.612,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024347
+    },
+    {
+      "time": 21.684,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024419
+    },
+    {
+      "time": 21.747,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024482
+    },
+    {
+      "time": 21.819,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024554
+    },
+    {
+      "time": 21.874,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024609
+    },
+    {
+      "time": 21.956,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024691
+    },
+    {
+      "time": 22.06,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024795
+    },
+    {
+      "time": 22.16,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024895
+    },
+    {
+      "time": 22.251,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349024986
+    },
+    {
+      "time": 22.372,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349025107
+    },
+    {
+      "time": 22.398,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349025133
+    },
+    {
+      "time": 22.52,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349025255
+    },
+    {
+      "time": 22.583,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349025318
+    },
+    {
+      "time": 22.672,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349025407
+    },
+    {
+      "time": 22.744,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349025479
+    },
+    {
+      "time": 22.855,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349025590
+    },
+    {
+      "time": 22.934,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349025669
+    },
+    {
+      "time": 22.992,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349025727
+    },
+    {
+      "time": 23.12,
+      "displacement": 4,
+      "phase": "INHALE",
+      "timestamp": 1781349025855
+    },
+    {
+      "time": 23.187,
+      "displacement": 3,
+      "phase": "INHALE",
+      "timestamp": 1781349025922
+    },
+    {
+      "time": 23.303,
+      "displacement": 2,
+      "phase": "INHALE",
+      "timestamp": 1781349026038
+    },
+    {
+      "time": 23.343,
+      "displacement": 2,
+      "phase": "INHALE",
+      "timestamp": 1781349026078
+    },
+    {
+      "time": 23.438,
+      "displacement": 1,
+      "phase": "INHALE",
+      "timestamp": 1781349026173
+    },
+    {
+      "time": 23.509,
+      "displacement": 1,
+      "phase": "INHALE",
+      "timestamp": 1781349026244
+    },
+    {
+      "time": 23.579,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349026314
+    },
+    {
+      "time": 23.71,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349026445
+    },
+    {
+      "time": 23.725,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349026460
+    },
+    {
+      "time": 23.863,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349026598
+    },
+    {
+      "time": 23.978,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349026713
+    },
+    {
+      "time": 24.032,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349026767
+    },
+    {
+      "time": 24.103,
+      "displacement": -3,
+      "phase": "EXHALE",
+      "timestamp": 1781349026838
+    },
+    {
+      "time": 24.181,
+      "displacement": -3,
+      "phase": "EXHALE",
+      "timestamp": 1781349026916
+    },
+    {
+      "time": 24.263,
+      "displacement": -3,
+      "phase": "EXHALE",
+      "timestamp": 1781349026998
+    },
+    {
+      "time": 24.323,
+      "displacement": -3,
+      "phase": "EXHALE",
+      "timestamp": 1781349027058
+    },
+    {
+      "time": 24.393,
+      "displacement": -3,
+      "phase": "EXHALE",
+      "timestamp": 1781349027128
+    },
+    {
+      "time": 24.491,
+      "displacement": -3,
+      "phase": "EXHALE",
+      "timestamp": 1781349027226
+    },
+    {
+      "time": 24.547,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349027282
+    },
+    {
+      "time": 24.624,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349027359
+    },
+    {
+      "time": 24.712,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349027447
+    },
+    {
+      "time": 24.768,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349027503
+    },
+    {
+      "time": 24.833,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349027568
+    },
+    {
+      "time": 24.886,
+      "displacement": -2,
+      "phase": "EXHALE",
+      "timestamp": 1781349027621
+    },
+    {
+      "time": 24.979,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349027714
+    },
+    {
+      "time": 25.078,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349027813
+    },
+    {
+      "time": 25.1,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349027835
+    },
+    {
+      "time": 25.216,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349027951
+    },
+    {
+      "time": 25.311,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349028046
+    },
+    {
+      "time": 25.422,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349028157
+    },
+    {
+      "time": 25.489,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349028224
+    },
+    {
+      "time": 25.545,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349028280
+    },
+    {
+      "time": 25.611,
+      "displacement": -1,
+      "phase": "EXHALE",
+      "timestamp": 1781349028346
+    },
+    {
+      "time": 25.702,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349028437
+    },
+    {
+      "time": 25.817,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349028552
+    },
+    {
+      "time": 25.84,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349028575
+    },
+    {
+      "time": 25.946,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349028681
+    },
+    {
+      "time": 26.011,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349028746
+    },
+    {
+      "time": 26.094,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349028829
+    },
+    {
+      "time": 26.2,
+      "displacement": 0,
+      "phase": "PAUSE",
+      "timestamp": 1781349028935
+    }
+  ],
+  "zero_value": 67,
+  "status": "completed",
+  "end_time": "2026-06-13T16:40:32.359275"
+}
