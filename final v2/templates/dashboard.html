@@ -524,6 +524,29 @@
             line-height: 1;
         }
 
+        .viz-threshold-line {
+            position: absolute;
+            left: -10px;
+            width: 210px;
+            height: 0;
+            border-top: 2px dashed var(--teal);
+            z-index: 8;
+            display: none;
+            pointer-events: none;
+            transition: top 0.05s linear;
+        }
+        .viz-threshold-line.active { display: block; }
+        .viz-threshold-line.inhale { border-color: var(--green); }
+        .viz-threshold-line.exhale { border-color: var(--red); }
+        .viz-threshold-label {
+            position: absolute;
+            right: -52px; top: -8px;
+            font-family: var(--font-mono);
+            font-size: 0.55rem;
+            white-space: nowrap;
+            color: var(--text-secondary);
+        }
+
         .phase-readout {
             margin-top: 24px;
             display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -833,6 +856,60 @@
             letter-spacing: 0.02em;
         }
 
+        /* Threshold range controls */
+        .threshold-group {
+            display: flex; gap: 8px; align-items: flex-end;
+        }
+        .threshold-field {
+            flex: 1; display: flex; flex-direction: column; gap: 4px;
+        }
+        .threshold-field label {
+            font-family: var(--font-mono);
+            font-size: 0.58rem; font-weight: 600;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .threshold-field input[type="number"] {
+            width: 100%;
+            padding: 9px 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border-dim);
+            background: rgba(0,0,0,0.3);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            text-align: center;
+        }
+        .threshold-field input[type="number"]:focus {
+            outline: none;
+            border-color: var(--teal);
+            box-shadow: 0 0 8px rgba(0,212,200,0.25);
+        }
+        .threshold-set-btn {
+            padding: 9px 18px;
+            border-radius: 5px;
+            border: 1px solid rgba(0,212,200,0.45);
+            background: var(--teal-dim);
+            color: var(--teal);
+            font-family: var(--font-mono);
+            font-size: 0.72rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .threshold-set-btn:hover {
+            background: rgba(0,212,200,0.22);
+            box-shadow: 0 0 12px rgba(0,212,200,0.25);
+        }
+        .threshold-hint {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            letter-spacing: 0.02em;
+        }
+
         /* Timer pane */
         .timer-pane {
             display: flex; flex-direction: column;
@@ -1087,15 +1164,17 @@
                                         <div class="cylinder-tick"></div>
                                     </div>
                                     <div class="moving-ring" id="movingRing"></div>
+                                    <div class="viz-threshold-line" id="vizThresholdMin"><span class="viz-threshold-label" id="vizThresholdMinLabel"></span></div>
+                                    <div class="viz-threshold-line" id="vizThresholdMax"><span class="viz-threshold-label" id="vizThresholdMaxLabel"></span></div>
                                 </div>
                                 <div class="cylinder-cap-top"></div>
                                 <div class="cylinder-cap-bottom"></div>
                                 <div class="cylinder-scale">
-                                    <span class="scale-label">+5</span>
-                                    <span class="scale-label">+3</span>
+                                    <span class="scale-label">+4</span>
+                                    <span class="scale-label">+2</span>
                                     <span class="scale-label"> 0</span>
-                                    <span class="scale-label">-3</span>
-                                    <span class="scale-label">-5</span>
+                                    <span class="scale-label">-2</span>
+                                    <span class="scale-label">-4</span>
                                 </div>
                             </div>
                             <div class="phase-readout">
@@ -1170,6 +1249,21 @@
                                     </div>
                                 </div>
                             </div>
+                            <div>
+                                <div class="relay-section-label">Threshold Range (cm)</div>
+                                <div class="threshold-group">
+                                    <div class="threshold-field">
+                                        <label for="thresholdMin">Min</label>
+                                        <input type="number" id="thresholdMin" min="0" max="4" step="0.1" placeholder="0–4">
+                                    </div>
+                                    <div class="threshold-field">
+                                        <label for="thresholdMax">Max</label>
+                                        <input type="number" id="thresholdMax" min="0" max="4" step="0.1" placeholder="0–4">
+                                    </div>
+                                    <button class="threshold-set-btn" id="setThresholdBtn">Set</button>
+                                </div>
+                                <div class="threshold-hint">Relay (auto mode) triggers when displacement enters this band for the selected phase.</div>
+                            </div>
                             <div class="relay-btn-wrap">
                                 <button class="relay-toggle-btn off" id="relayToggleBtn">
                                     <span class="relay-dot off" id="relayDot"></span>
@@ -1185,7 +1279,7 @@
                             </div>
                             <div class="relay-status-bar" id="relayStatusBar">
                                 <span class="relay-status-icon">ℹ️</span>
-                                <span id="relayStatusText">Auto mode — relay triggers when breath hold ≥ 5 s is detected.</span>
+                                <span id="relayStatusText">Auto mode — set an Inhale/Exhale threshold range above and press Set to enable relay triggering.</span>
                             </div>
                             <div class="data-log-section" id="dataLogSection">
                                 <div class="data-log-header">
@@ -1203,7 +1297,7 @@
                 <div class="pane" id="pane4">
                     <div class="pane-header">
                         <div class="pane-header-icon"><i class="fas fa-stopwatch"></i></div>
-                        Breath-Hold Timer
+                        Relay Timer
                     </div>
                     <div class="pane-content">
                         <div class="timer-pane">
@@ -1216,15 +1310,6 @@
                                 <div class="timer-display idle" id="timerDisplay">00:00.0</div>
                             </div>
                             <div class="timer-state-badge idle" id="timerBadge">IDLE</div>
-                            <div class="hold-progress-wrap" id="holdProgressWrap" style="display:none;">
-                                <div class="hold-progress-label">
-                                    <span>Detecting hold…</span>
-                                    <span id="holdProgressSec">0 / 5 s</span>
-                                </div>
-                                <div class="hold-progress-track">
-                                    <div class="hold-progress-fill" id="holdProgressFill"></div>
-                                </div>
-                            </div>
                             <div class="timer-sub" id="timerSub">
                                 Waiting for relay to activate.<br>
                                 Calibrate zero to reset timer.
@@ -1257,10 +1342,6 @@
         let timerStartMs     = null;
         let timerFrozenValue = null;
         let timerRAF         = null;
-
-        const HOLD_THRESHOLD_SEC = 5;
-        let holdStartTime = null;
-        let holdPhaseActive = false;
 
         // Session data for current patient
         let currentSession = {
@@ -1435,6 +1516,29 @@
         /* ─────────────────────────────────────────────────────────
            CHART.JS
         ───────────────────────────────────────────────────────── */
+        // Returns the currently active "max limit" for the selected phase,
+        // expressed in the same signed displacement units as the raw data
+        // (positive band for inhale, negative band for exhale).
+        function getActiveMaxLimit() {
+            const t = phaseThresholds[selectedPhase];
+            const signed = getSignedThresholds(selectedPhase, t);
+            return signed ? signed.max : null;
+        }
+        function isPastMaxLimit(v) {
+            const limit = getActiveMaxLimit();
+            if (limit === null) return false;
+            // Inhale band is positive (exceeding = going higher than limit);
+            // exhale band is negative (exceeding = going lower than limit).
+            return selectedPhase === 'inhale' ? v > limit : v < limit;
+        }
+        // Chart.js per-segment color callback: a segment (the line between
+        // two consecutive points) is drawn red if either endpoint is past
+        // the configured max limit, green otherwise.
+        function waveformSegmentColor(segCtx) {
+            const v0 = segCtx.p0.parsed.y;
+            const v1 = segCtx.p1.parsed.y;
+            return (isPastMaxLimit(v0) || isPastMaxLimit(v1)) ? '#ff3b5c' : '#00e676';
+        }
         Chart.register(ChartZoom);
         const ctx = document.getElementById('breathingGraph').getContext('2d');
         const breathingChart = new Chart(ctx, {
@@ -1443,12 +1547,36 @@
                 datasets: [{
                     label: 'Chest Displacement (cm)',
                     data: [],
-                    borderColor: '#00d4c8',
-                    backgroundColor: 'rgba(0,212,200,0.08)',
+                    borderColor: '#00e676',
+                    backgroundColor: 'rgba(0,230,118,0.08)',
                     borderWidth: 2,
-                    fill: true, tension: 0.15,
+                    fill: true, tension: 0.4,
                     pointRadius: 0, pointHoverRadius: 4,
-                    spanGaps: true
+                    spanGaps: true,
+                    order: 1,
+                    segment: {
+                        borderColor: segCtx => waveformSegmentColor(segCtx)
+                    }
+                }, {
+                    label: 'Min Threshold',
+                    data: [],
+                    borderColor: '#00e676',
+                    borderWidth: 1.5,
+                    borderDash: [6, 4],
+                    fill: false, tension: 0,
+                    pointRadius: 0, pointHoverRadius: 0,
+                    spanGaps: true,
+                    order: 0
+                }, {
+                    label: 'Max Threshold',
+                    data: [],
+                    borderColor: '#00e676',
+                    borderWidth: 1.5,
+                    borderDash: [6, 4],
+                    fill: false, tension: 0,
+                    pointRadius: 0, pointHoverRadius: 0,
+                    spanGaps: true,
+                    order: 0
                 }]
             },
             options: {
@@ -1461,7 +1589,7 @@
                         ticks: { color: '#4a6080', stepSize: 1, precision: 0, font: { family: 'JetBrains Mono', size: 10 },
                             callback: v => v.toFixed(0) + ' cm'
                         },
-                        min: -5, max: 5
+                        min: -4, max: 4
                     },
                     x: {
                         title: { display: true, text: 'Time (seconds)', color: '#4a6080', font: { family: 'JetBrains Mono', size: 10 } },
@@ -1482,7 +1610,7 @@
                         titleFont: { family: 'JetBrains Mono', size: 10 },
                         bodyFont: { family: 'JetBrains Mono', size: 10 },
                         callbacks: {
-                            label: c => `Displacement: ${c.parsed.y.toFixed(0)} cm`,
+                            label: c => `${c.dataset.label}: ${c.parsed.y.toFixed(1)} cm`,
                             title: c => `Time: ${c[0].parsed.x.toFixed(1)} s`
                         }
                     },
@@ -1498,7 +1626,7 @@
                             onZoom() { if (scrollMode === 'auto') { scrollMode='manual'; updateScrollButtons(); showNotification('Manual zoom mode. Click Auto to resume.','info'); } },
                             onZoomComplete() { breathingChart.update('none'); }
                         },
-                        limits: { x: { min: 0, max: 300 }, y: { min: -10, max: 10 } }
+                        limits: { x: { min: 0, max: 300 }, y: { min: -4, max: 4 } }
                     }
                 }
             }
@@ -1534,8 +1662,8 @@
                 breathingChart.options.scales.x.min = 0;
                 breathingChart.options.scales.x.max = timeWindowSeconds;
             }
-            breathingChart.options.scales.y.min = -5;
-            breathingChart.options.scales.y.max = 5;
+            breathingChart.options.scales.y.min = -4;
+            breathingChart.options.scales.y.max = 4;
             breathingChart.update('none');
         }
         function updateGraph() {
@@ -1552,15 +1680,8 @@
                 breathingChart.options.scales.x.min = Math.max(0, ct - timeWindowSeconds);
                 breathingChart.options.scales.x.max = ct;
             }
-            if (pts.length > 5) {
-                const ry = pts.slice(-30).map(p => p.y);
-                const my = Math.max(...ry, 1); const miy = Math.min(...ry, -1);
-                const pd = Math.max(0.5, (my - miy) * 0.2);
-                breathingChart.options.scales.y.min = miy - pd;
-                breathingChart.options.scales.y.max = my + pd;
-            } else {
-                breathingChart.options.scales.y.min = -3; breathingChart.options.scales.y.max = 3;
-            }
+            breathingChart.options.scales.y.min = -4;
+            breathingChart.options.scales.y.max = 4;
             breathingChart.update('none');
             if (displacementData.length > 0) {
                 const val = displacementData[displacementData.length - 1];
@@ -1581,16 +1702,77 @@
            RING POSITION (visualizer)
         ───────────────────────────────────────────────────────── */
         const movingRing = document.getElementById('movingRing');
+        const VIZ_MAX_D = 4, VIZ_MIN_TOP = 50, VIZ_MAX_TOP = 250;
+        function vizPositionForValue(v) {
+            const clamped = Math.max(-VIZ_MAX_D, Math.min(VIZ_MAX_D, v));
+            const norm = (clamped + VIZ_MAX_D) / (2 * VIZ_MAX_D);
+            return VIZ_MAX_TOP - (norm * (VIZ_MAX_TOP - VIZ_MIN_TOP));
+        }
         function updateRingPosition(displacement) {
-            const maxD = 3, minTop = 50, maxTop = 250;
-            const clamped = Math.max(-maxD, Math.min(maxD, displacement));
-            const norm = (clamped + maxD) / (2 * maxD);
-            const topPos = maxTop - (norm * (maxTop - minTop));
-            movingRing.style.top = `${topPos}px`;
+            movingRing.style.top = `${vizPositionForValue(displacement)}px`;
             const phaseText = document.getElementById('phaseText');
             if (displacement >= 1)       { phaseText.innerHTML = 'INHALING ↑'; phaseText.className = 'phase-text phase-inhale'; }
             else if (displacement <= -1) { phaseText.innerHTML = 'EXHALING ↓'; phaseText.className = 'phase-text phase-exhale'; }
             else                         { phaseText.innerHTML = 'PAUSE ●';     phaseText.className = 'phase-text phase-pause'; }
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           THRESHOLD RANGE (inhale/exhale trigger band)
+        ───────────────────────────────────────────────────────── */
+        let phaseThresholds = {
+            inhale: { min: null, max: null },
+            exhale: { min: null, max: null }
+        };
+
+        function getSignedThresholds(phase, t) {
+            if (!t || t.min === null || t.max === null) return null;
+            return phase === 'inhale'
+                ? { min: t.min, max: t.max }
+                : { min: -t.min, max: -t.max };
+        }
+
+        function updateVisualizerThresholdLines() {
+            const t = phaseThresholds[selectedPhase];
+            const minEl = document.getElementById('vizThresholdMin');
+            const maxEl = document.getElementById('vizThresholdMax');
+            const minLabel = document.getElementById('vizThresholdMinLabel');
+            const maxLabel = document.getElementById('vizThresholdMaxLabel');
+            const signed = getSignedThresholds(selectedPhase, t);
+            if (!signed) {
+                minEl.className = 'viz-threshold-line';
+                maxEl.className = 'viz-threshold-line';
+                return;
+            }
+            minEl.style.top = `${vizPositionForValue(signed.min)}px`;
+            maxEl.style.top = `${vizPositionForValue(signed.max)}px`;
+            minEl.className = `viz-threshold-line active ${selectedPhase}`;
+            maxEl.className = `viz-threshold-line active ${selectedPhase}`;
+            minLabel.textContent = `MIN ${t.min.toFixed(1)}`;
+            maxLabel.textContent = `MAX ${t.max.toFixed(1)}`;
+        }
+
+        function updateGraphThresholdLines() {
+            const t = phaseThresholds[selectedPhase];
+            const signed = getSignedThresholds(selectedPhase, t);
+            const color = selectedPhase === 'inhale' ? '#00e676' : '#ff3b5c';
+            const phaseLabel = selectedPhase === 'inhale' ? 'Inhale' : 'Exhale';
+            if (!signed) {
+                breathingChart.data.datasets[1].data = [];
+                breathingChart.data.datasets[2].data = [];
+            } else {
+                breathingChart.data.datasets[1].data = [{ x: 0, y: signed.min }, { x: 100000, y: signed.min }];
+                breathingChart.data.datasets[2].data = [{ x: 0, y: signed.max }, { x: 100000, y: signed.max }];
+                breathingChart.data.datasets[1].borderColor = color;
+                breathingChart.data.datasets[2].borderColor = color;
+                breathingChart.data.datasets[1].label = `${phaseLabel} Min (${t.min.toFixed(1)} cm)`;
+                breathingChart.data.datasets[2].label = `${phaseLabel} Max (${t.max.toFixed(1)} cm)`;
+            }
+            breathingChart.update('none');
+        }
+
+        function updateThresholdDisplay() {
+            updateGraphThresholdLines();
+            updateVisualizerThresholdLines();
         }
 
         /* ─────────────────────────────────────────────────────────
@@ -1635,9 +1817,10 @@
             document.getElementById('relayManualBtn').classList.remove('active');
             socket.emit('relay_set_mode', { mode: 'auto' });
             if (relayOn) { setRelay(false); stopTimer(); }
-            holdStartTime = null; holdPhaseActive = false;
-            document.getElementById('holdProgressWrap').style.display = 'none';
-            updateRelayStatus('Auto mode — relay triggers when breath hold ≥ 5 s is detected.');
+            const t = phaseThresholds[selectedPhase];
+            updateRelayStatus(t && t.min !== null
+                ? `Auto mode — monitoring ${selectedPhase} threshold band (${t.min.toFixed(1)}–${t.max.toFixed(1)} cm).`
+                : `Auto mode — set ${selectedPhase} threshold range and press Set.`);
         });
         document.getElementById('relayManualBtn').addEventListener('click', () => {
             relayMode = 'manual';
@@ -1645,20 +1828,35 @@
             document.getElementById('relayAutoBtn').classList.remove('active');
             socket.emit('relay_set_mode', { mode: 'manual' });
             if (relayOn) { setRelay(false); stopTimer(); }
-            holdStartTime = null; holdPhaseActive = false;
-            document.getElementById('holdProgressWrap').style.display = 'none';
             updateRelayStatus('Manual mode — press the relay button to toggle.');
         });
 
         document.querySelectorAll('input[name="breathPhase"]').forEach(r => {
             r.addEventListener('change', () => {
                 selectedPhase = r.value;
-                holdStartTime = null; holdPhaseActive = false;
-                if (relayOn && relayMode === 'auto') {
-                    setRelay(false); stopTimer();
-                    updateRelayStatus(`Auto mode — now monitoring for ${selectedPhase} hold ≥ 5 s.`);
-                }
+                const t = phaseThresholds[selectedPhase];
+                document.getElementById('thresholdMin').value = t && t.min !== null ? t.min : '';
+                document.getElementById('thresholdMax').value = t && t.max !== null ? t.max : '';
+                updateThresholdDisplay();
+                if (relayOn && relayMode === 'auto') { setRelay(false); stopTimer(); }
+                updateRelayStatus(t && t.min !== null
+                    ? `Auto mode — monitoring ${selectedPhase} threshold band (${t.min.toFixed(1)}–${t.max.toFixed(1)} cm).`
+                    : `Auto mode — set ${selectedPhase} threshold range and press Set.`);
             });
+        });
+
+        document.getElementById('setThresholdBtn').addEventListener('click', () => {
+            const minVal = parseFloat(document.getElementById('thresholdMin').value);
+            const maxVal = parseFloat(document.getElementById('thresholdMax').value);
+            if (isNaN(minVal) || isNaN(maxVal) || minVal < 0 || maxVal > 4 || minVal >= maxVal) {
+                showNotification('Enter a valid Min/Max (0–4 cm, Min < Max).', 'warning');
+                return;
+            }
+            phaseThresholds[selectedPhase] = { min: minVal, max: maxVal };
+            updateThresholdDisplay();
+            const phaseLabel = selectedPhase === 'inhale' ? 'Inhale' : 'Exhale';
+            updateRelayStatus(`Auto — ${selectedPhase} threshold set: ${minVal.toFixed(1)}–${maxVal.toFixed(1)} cm. Monitoring for trigger.`);
+            showNotification(`${phaseLabel} threshold set (${minVal.toFixed(1)}–${maxVal.toFixed(1)} cm).`, 'success');
         });
 
         /* ─────────────────────────────────────────────────────────
@@ -1731,45 +1929,26 @@
         }
 
         /* ─────────────────────────────────────────────────────────
-           AUTO HOLD DETECTION
+           AUTO THRESHOLD DETECTION
         ───────────────────────────────────────────────────────── */
-        function processAutoHold(displacement) {
+        function processAutoThreshold(displacement) {
             if (relayMode !== 'auto') return;
-            const phase = displacement >= 1 ? 'inhale' : displacement <= -1 ? 'exhale' : 'pause';
-            const inTargetPhase = (phase === selectedPhase);
-            if (!relayOn) {
-                if (inTargetPhase) {
-                    if (!holdPhaseActive) { holdPhaseActive = true; holdStartTime = Date.now(); }
-                    const elapsed = (Date.now() - holdStartTime) / 1000;
-                    const pct = Math.min(100, (elapsed / HOLD_THRESHOLD_SEC) * 100);
-                    document.getElementById('holdProgressWrap').style.display = 'block';
-                    document.getElementById('holdProgressFill').style.width = pct + '%';
-                    document.getElementById('holdProgressSec').textContent = `${elapsed.toFixed(1)} / ${HOLD_THRESHOLD_SEC} s`;
-                    if (elapsed >= HOLD_THRESHOLD_SEC) {
-                        setRelay(true);
-                        startTimer();
-                        document.getElementById('holdProgressWrap').style.display = 'none';
-                        updateRelayStatus(`Auto — ${selectedPhase} hold detected (${HOLD_THRESHOLD_SEC}s). Relay ON, timer running.`);
-                        showNotification(`Relay triggered: ${selectedPhase} hold detected`, 'success');
-                    } else {
-                        updateRelayStatus(`Auto — detecting ${selectedPhase} hold… ${elapsed.toFixed(1)} / ${HOLD_THRESHOLD_SEC} s`);
-                    }
-                } else {
-                    if (holdPhaseActive) {
-                        holdPhaseActive = false; holdStartTime = null;
-                        document.getElementById('holdProgressWrap').style.display = 'none';
-                        document.getElementById('holdProgressFill').style.width = '0%';
-                        updateRelayStatus(`Auto mode — monitoring for ${selectedPhase} hold ≥ ${HOLD_THRESHOLD_SEC} s.`);
-                    }
-                }
-            } else {
-                if (!inTargetPhase && phase !== 'pause') {
-                    setRelay(false); stopTimer();
-                    holdPhaseActive = false; holdStartTime = null;
-                    document.getElementById('holdProgressWrap').style.display = 'none';
-                    updateRelayStatus('Auto — breathing pattern changed. Relay OFF.');
-                    showNotification('Relay off: breathing resumed.', 'info');
-                }
+            const t = phaseThresholds[selectedPhase];
+            const signed = getSignedThresholds(selectedPhase, t);
+            if (!signed) return;
+            const lo = Math.min(signed.min, signed.max);
+            const hi = Math.max(signed.min, signed.max);
+            const inBand = displacement >= lo && displacement <= hi;
+            if (inBand && !relayOn) {
+                setRelay(true);
+                startTimer();
+                updateRelayStatus(`Auto — displacement in ${selectedPhase} band (${lo.toFixed(1)} to ${hi.toFixed(1)} cm). Relay ON.`);
+                showNotification(`Relay triggered: ${selectedPhase} threshold reached`, 'success');
+            } else if (!inBand && relayOn) {
+                setRelay(false);
+                stopTimer();
+                updateRelayStatus(`Auto — outside ${selectedPhase} threshold band. Relay OFF.`);
+                showNotification('Relay off: outside threshold band.', 'info');
             }
         }
 
@@ -1795,9 +1974,6 @@
                 }
                 if (relayOn) { setRelay(false); }
                 resetTimer();
-                holdPhaseActive = false; holdStartTime = null;
-                document.getElementById('holdProgressWrap').style.display = 'none';
-                document.getElementById('holdProgressFill').style.width = '0%';
             } else {
                 showNotification('Please calibrate — have patient lie still then click Calibrate.', 'warning');
             }
@@ -1832,7 +2008,7 @@
                 updateGraph();
             }
             updateRingPosition(displacement);
-            processAutoHold(displacement);
+            processAutoThreshold(displacement);
         });
 
         socket.on('relay_status_update', (data) => {
